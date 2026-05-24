@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# virtual env
+.venv/
+venv/
+env/
+
+# caches / generated data
+cache/
+tick_cache/
+market_data/
+report_out/
+
+# generated data files
+*.parquet
+*.feather
+*.csv
+*.log
+*.sqlite
+*.db
+
+# editor / OS
+.vscode/
+.DS_Store
+Thumbs.db

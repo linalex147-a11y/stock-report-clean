@@ -1,0 +1,64 @@
+name: Deploy report to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare index.html for GitHub Pages
+        shell: pwsh
+        run: |
+          # report.py 已在根目錄創建 index.html
+          # 如果根目錄有 index.html，複製到 report_out
+          if (Test-Path index.html) {
+            Copy-Item index.html report_out/index.html -Force
+            Write-Host "Deployed root index.html to report_out/index.html"
+          } elseif (Test-Path report_out) {
+            # 備用方案：尋找最新的 report_*.html
+            $latest = Get-ChildItem report_out -Filter "report_*.html" |
+              Sort-Object LastWriteTime -Descending |
+              Select-Object -First 1
+
+            if ($null -ne $latest) {
+              Copy-Item $latest.FullName report_out/index.html -Force
+              Write-Host "Deployed $($latest.Name) as index.html"
+            } else {
+              throw "No index.html or report_*.html file found."
+            }
+          } else {
+            throw "report_out folder not found."
+          }
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: report_out
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+

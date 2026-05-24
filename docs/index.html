@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI多週期盤後結構報表</title>
+<style>
+  :root {
+    --bg: #f5f7fb;
+    --panel: rgba(255,255,255,0.96);
+    --border: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+    --dark: #172033;
+    --green: #0f766e;
+    --green-soft: #ecfdf5;
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+    --blue: #2563eb;
+    --blue-soft: #eff6ff;
+    --gray-soft: #f3f4f6;
+    --orange-soft: #fff7ed;
+    --orange: #d97706;
+  }
+
+  body {
+    font-family: "Segoe UI", "Microsoft JhengHei", Arial, sans-serif;
+    background: var(--bg);
+    margin:0;
+    padding:20px;
+    color: var(--text);
+  }
+
+  .container { max-width: 2000px; margin: auto; }
+  .topbar { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; margin-bottom:14px; flex-wrap:wrap; }
+  .brand h1 { margin:0 0 8px; font-size:28px; line-height:1.2; }
+  .sub { color: var(--muted); margin:0; font-size:13px; }
+  .update-card { display:flex; gap:12px; align-items:center; background: var(--panel); border:1px solid var(--border); border-radius:18px; padding:12px 16px; box-shadow:0 4px 18px rgba(15,23,42,.06); min-width: 300px; }
+  .update-icon { font-size:28px; line-height:1; }
+  .update-title { font-weight:800; font-size:15px; color: var(--dark); }
+  .update-sub { font-size:12px; color: var(--muted); margin-top:2px; }
+  .dash-grid { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; margin: 10px 0 18px; }
+  .dash-card { background: var(--panel); border:1px solid var(--border); border-radius:18px; padding:14px 16px; box-shadow:0 8px 24px rgba(15,23,42,.08); }
+  .dash-k { font-size:12px; color: var(--muted); font-weight:800; margin-bottom:6px; }
+  .dash-v { font-size:20px; font-weight:900; color: var(--dark); margin-bottom:4px; }
+  .dash-s { font-size:12px; color: var(--muted); }
+  .section { margin-bottom:16px; background: var(--panel); border:1px solid var(--border); border-radius:18px; box-shadow:0 8px 24px rgba(15,23,42,.08); overflow:hidden; }
+  .section-head { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; background: linear-gradient(180deg, #ffffff, #f8fafc); }
+  .section-title { font-weight:900; font-size:18px; color: var(--dark); }
+  .section-sub { font-size:12px; color: var(--muted); }
+  .toolbar { margin-bottom:15px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  .btn { padding:10px 16px; border:none; border-radius:999px; cursor:pointer; background:#e5e7eb; font-size:14px; font-weight:700; color:#1f2937; }
+  .btn.active { background:#2563eb; color:white; }
+  .search { margin-left:auto; min-width:220px; max-width:320px; width:100%; padding:10px 14px; border-radius:14px; border:1px solid #d7dee8; font-size:14px; background:white; color:#111827; outline:none; }
+  .search:focus { border-color:#2563eb; }
+  .table-scroll { width:100%; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; }
+  .sector-wrap { padding:16px; }
+  table { border-collapse:collapse; width:max-content; min-width:1200px; }
+  .sector-table { min-width:900px; width:max-content; }
+  .main-table { min-width:1320px; }
+  th { background: linear-gradient(180deg, #1f2937 0%, #0f172a 100%); color:white; padding:14px 12px; position:sticky; top:0; z-index:2; white-space:nowrap; font-size:15px; }
+  td { padding:14px 12px; border-bottom:1px solid #e5e7eb; vertical-align:top; background: rgba(255,255,255,0.9); }
+  tr:hover td { background:#f9fafb; }
+  .stock-cell { min-width:220px; max-width:260px; }
+  .stock-main { font-size:16px; font-weight:900; color: var(--dark); white-space:nowrap; }
+  .stock-sub { font-size:12px; color: var(--muted); font-weight:700; margin-top:3px; line-height:1.45; }
+  .multi-cell { min-width:260px; max-width:320px; white-space:normal; line-height:1.6; }
+  .script-cell { min-width:300px; max-width:360px; white-space:normal; line-height:1.65; color:#374151; font-size:13px; }
+  .script { min-width:340px; max-width:420px; white-space:normal; line-height:1.7; }
+  .temp-badge { display:inline-flex; align-items:center; padding:7px 10px; border-radius:999px; font-weight:800; font-size:13px; border:1px solid transparent; white-space:nowrap; }
+  .temp-hot { background:#dcfce7; color:#166534; border-color:#86efac; }
+  .temp-warm { background:#fff7ed; color:#9a3412; border-color:#fdba74; }
+  .temp-neutral { background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
+  .temp-cool { background:#f3f4f6; color:#4b5563; border-color:#d1d5db; }
+  .temp-danger { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
+  .layer { display:flex; gap:8px; align-items:center; margin:4px 0; line-height:1.45; }
+  .layer-label { display:inline-flex; align-items:center; justify-content:center; min-width:48px; padding:3px 8px; border-radius:999px; font-size:12px; font-weight:800; background:#eff6ff; color:#1d4ed8; flex:0 0 auto; }
+  .layer-text { color:#111827; font-size:13px; font-weight:600; }
+  .script-wrap { display:flex; flex-direction:column; gap:6px; background:#fff; border:1px solid var(--border); border-left:5px solid #22c55e; border-radius:14px; padding:10px 12px; }
+  .script-core { font-size:14px; font-weight:900; padding:3px 10px; border-radius:999px; background:#dcfce7; color:#14532d; width:fit-content; }
+  .script-line { display:flex; gap:8px; align-items:flex-start; padding:4px 8px; background:#f8fafc; border-radius:8px; font-size:13px; }
+  .line-label { padding:2px 8px; border-radius:6px; font-size:12px; font-weight:800; flex-shrink:0; }
+  .line-text { color:var(--dark); font-weight:600; flex:1 1 auto; line-height:1.55; }
+  .line-green { background:#ecfdf5; color:#047857; }
+  .line-red { background:var(--red-soft); color:var(--red); }
+  .line-blue { background:var(--blue-soft); color:var(--blue); }
+  .script-row { display:flex; align-items:center; }
+  .tag { display:inline-flex; align-items:center; padding:5px 9px; border-radius:999px; font-size:12px; font-weight:800; }
+  .tag-green { background:#ecfdf5; color:#047857; }
+  .script-summary { color:#166534; background:#f0fdf4; padding:6px 10px; border-radius:8px; font-size:13px; font-weight:700; margin-top:0; line-height:1.55; }
+  .sector-table th { position:static; font-size:14px; padding:12px 10px; }
+  .sector-table td { white-space:nowrap; font-size:14px; padding:12px 10px; background:white; }
+  .sector-badge { display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px; font-weight:800; font-size:12px; border:1px solid transparent; }
+  .sector-hot { background:#dcfce7; color:#166534; border-color:#86efac; }
+  .sector-warm { background:#fff7ed; color:#9a3412; border-color:#fdba74; }
+  .sector-neutral { background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
+  .sector-cool { background:#f3f4f6; color:#4b5563; border-color:#d1d5db; }
+  @media (max-width: 900px) { body { padding:12px; } .brand h1 { font-size:24px; } .search { min-width:100%; margin-left:0; margin-top:10px; } th, td { padding:12px 10px; font-size:13px; } .dash-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="topbar">
+    <div class="brand">
+      <h1>📊 AI多週期盤後結構報表</h1>
+      <p class="sub">整合 日K 趨勢、真實30分K、族群強弱、溫度與情境敘事，讓報表更像交易員 briefing</p>
+    </div>
+    <div class="update-card">
+      <div class="update-icon">📅</div>
+      <div>
+        <div class="update-title">更新時間：2026-05-24 17:32</div>
+        <div class="update-sub">每日盤後自動執行同步</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    
+      <div class="dash-card"><div class="dash-k">市場情緒</div><div class="dash-v">🌤 中性偏多</div><div class="dash-s">平均分數 71.5｜強勢比 52%</div></div>
+      <div class="dash-card"><div class="dash-k">最強族群</div><div class="dash-v">AI伺服器</div><div class="dash-s">攻擊盤 29｜風險 6</div></div>
+      <div class="dash-card"><div class="dash-k">最強股票</div><div class="dash-v">2451 創見</div><div class="dash-s">總檔數 62</div></div>
+      <div class="dash-card"><div class="dash-k">整體平均</div><div class="dash-v">71.5</div><div class="dash-s">族群 9 個</div></div>
+    
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div>
+        <div class="section-title">族群強弱總表</div>
+        <div class="section-sub">依各族群成員的 AI 分數平均計算，分數越高代表族群越強</div>
+      </div>
+    </div>
+    <div class="sector-wrap">
+      <div class="table-scroll">
+        <table class="sector-table">
+          <thead>
+            <tr>
+              <th>族群</th>
+              <th>平均分數</th>
+              <th>狀態</th>
+              <th>代表股</th>
+              <th>成員數</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>AI伺服器</td><td><strong>81.9</strong></td><td><span class="sector-badge sector-hot">主流</span></td><td>3231 緯創</td><td>10</td></tr>
+<tr><td>記憶體</td><td><strong>78.4</strong></td><td><span class="sector-badge sector-warm">偏強</span></td><td>2451 創見</td><td>8</td></tr>
+<tr><td>自選</td><td><strong>77.8</strong></td><td><span class="sector-badge sector-warm">偏強</span></td><td>3264 欣銓</td><td>10</td></tr>
+<tr><td>機器人</td><td><strong>72.3</strong></td><td><span class="sector-badge sector-warm">偏強</span></td><td>1536 和大</td><td>7</td></tr>
+<tr><td>PCB</td><td><strong>67.3</strong></td><td><span class="sector-badge sector-warm">偏強</span></td><td>5469 瀚宇博</td><td>9</td></tr>
+<tr><td>ASIC</td><td><strong>65.6</strong></td><td><span class="sector-badge sector-warm">偏強</span></td><td>3443 創意</td><td>7</td></tr>
+<tr><td>光通訊</td><td><strong>64.8</strong></td><td><span class="sector-badge sector-neutral">整理</span></td><td>3363 上詮</td><td>6</td></tr>
+<tr><td>封測</td><td><strong>64.2</strong></td><td><span class="sector-badge sector-neutral">整理</span></td><td>2449 京元電子</td><td>9</td></tr>
+<tr><td>玻纖布</td><td><strong>62.0</strong></td><td><span class="sector-badge sector-neutral">整理</span></td><td>8039 台虹</td><td>4</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn active" data-cat="全部">全部</button>
+<button class="btn" data-cat="自選">自選</button>
+<button class="btn" data-cat="AI伺服器">AI伺服器</button>
+<button class="btn" data-cat="ASIC">ASIC</button>
+<button class="btn" data-cat="封測">封測</button>
+<button class="btn" data-cat="PCB">PCB</button>
+<button class="btn" data-cat="記憶體">記憶體</button>
+<button class="btn" data-cat="光通訊">光通訊</button>
+<button class="btn" data-cat="機器人">機器人</button>
+<button class="btn" data-cat="玻纖布">玻纖布</button>
+
+    <input id="searchBox" class="search" type="text" placeholder="搜尋股票、族群、情境、劇本...">
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div>
+        <div class="section-title">個股 AI 盤後筆記</div>
+        <div class="section-sub">股票欄已整合股票 / 族群 / AI分數 / 現價；多週期判讀只保留方向 / 位階 / 節奏 / 情緒</div>
+      </div>
+    </div>
+    <div class="table-wrap table-scroll">
+      <table class="main-table">
+        <thead>
+          <tr>
+            <th>股票</th>
+            <th>多週期判讀</th>
+            <th>情境提醒</th>
+            <th>AI策略劇本</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-cats="記憶體">
+            <td class="stock-cell"><div class='stock-main'>2451 創見</div><div class='stock-sub'>記憶體｜AI 100｜現價 316.5｜🔥 攻擊盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.30x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🔥 攻擊盤</span></div></td>
+            <td class="script-cell">價格先收斂，市場在等方向表態。<br>盤面偏積極，續強機率較高。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟢 續強劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開盤守住 313.5(30M平台) / 309.5(前低)，可先觀察續攻。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若跌回 313.5(30M平台) / 309.5(前低) 下方且無法快速收復，節奏會先轉弱。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 322(30M平台)；若能帶量穿越，代表攻擊延續。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">目前屬於偏積極的結構，空間仍充足，以守支撐觀察續攻為主。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="AI伺服器">
+            <td class="stock-cell"><div class='stock-main'>3231 緯創</div><div class='stock-sub'>AI伺服器｜AI 100｜現價 144.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 4.49x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">價格先收斂，市場在等方向表態。<br>目前較適合觀察確認。 追價報酬效率普通，宜等更明確的突破。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟢 續強劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開盤守住 140.15(MA20) / 140(30M平台)，可先觀察續攻。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若跌回 140.15(MA20) / 140(30M平台) 下方且無法快速收復，節奏會先轉弱。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 148.84(保守壓力)；若能帶量穿越，代表攻擊延續。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">目前屬於偏積極的結構，空間普通，以守支撐觀察續攻為主。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="AI伺服器">
+            <td class="stock-cell"><div class='stock-main'>2382 廣達</div><div class='stock-sub'>AI伺服器｜AI 97｜現價 316｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏空</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>均線附近</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.66x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 空間條件不差，若結構延續，仍有操作彈性。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 308(30M平台) / 290(前低) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 308(30M平台) / 290(前低) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 316.5(30M平台) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="PCB">
+            <td class="stock-cell"><div class='stock-main'>5469 瀚宇博</div><div class='stock-sub'>PCB｜AI 97｜現價 82.9｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏空</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>均線附近</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.27x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 空間條件不差，若結構延續，仍有操作彈性。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 81.6(30M平台) / 79(前低) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 81.6(30M平台) / 79(前低) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 83.2(30M平台) / 86.53(MA60) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="機器人">
+            <td class="stock-cell"><div class='stock-main'>1536 和大</div><div class='stock-sub'>機器人｜AI 95｜現價 51.6｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏空</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>均線附近</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 1.94x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 空間條件不差，若結構延續，仍有操作彈性。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 50.2(30M平台) / 49.1(前低) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 50.2(30M平台) / 49.1(前低) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 52(30M平台) / 52.32(MA60) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="封測">
+            <td class="stock-cell"><div class='stock-main'>2449 京元電子</div><div class='stock-sub'>封測｜AI 95｜現價 296｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>均線附近</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.26x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 空間條件不差，若結構延續，仍有操作彈性。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 286(30M平台) / 277.5(前低) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 286(30M平台) / 277.5(前低) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 299(30M平台) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="AI伺服器">
+            <td class="stock-cell"><div class='stock-main'>3706 神達</div><div class='stock-sub'>AI伺服器｜AI 91｜現價 87.8｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.88x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">資金開始集中，整理後仍有續攻味道。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。 雖然結構偏強，但這個位置先不要把它當成好追價點。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟢 續強劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開盤守住 83.22(MA20) / 83.2(30M平台)，可先觀察續攻。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若跌回 83.22(MA20) / 83.2(30M平台) 下方且無法快速收復，節奏會先轉弱。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 90.43(保守壓力)；若能帶量穿越，代表攻擊延續。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">目前屬於偏積極的結構，空間偏緊，以守支撐觀察續攻為主。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="AI伺服器">
+            <td class="stock-cell"><div class='stock-main'>3017 奇鋐</div><div class='stock-sub'>AI伺服器｜AI 91｜現價 2545｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.06x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 2485(30M平台) / 2340(前低) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 2485(30M平台) / 2340(前低) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 2575(30M平台) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="光通訊">
+            <td class="stock-cell"><div class='stock-main'>3363 上詮</div><div class='stock-sub'>光通訊｜AI 91｜現價 852｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.48x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 空間條件不差，若結構延續，仍有操作彈性。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 818.65(MA20) / 816(30M平台) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 818.65(MA20) / 816(30M平台) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 859(30M平台) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。</div><br></div><br></td>
+        </tr>
+<tr data-cats="封測">
+            <td class="stock-cell"><div class='stock-main'>8150 南茂</div><div class='stock-sub'>封測｜AI 91｜現價 79.1｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.25x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 空間條件不差，若結構延續，仍有操作彈性。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 75.9(30M平台) / 74.4(前低) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 75.9(30M平台) / 74.4(前低) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 79.8(大量K) / 81.4(30M平台) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。</div><br></div><br></td>
+        </tr>
+<tr data-cats="機器人">
+            <td class="stock-cell"><div class='stock-main'>2049 上銀</div><div class='stock-sub'>機器人｜AI 90｜現價 376.5｜🟠 偏熱盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.01x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🟠 偏熱盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>趨勢仍在，但短線已開始偏熱。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">373.5(30M平台) / 359.5(前低) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">383(30M平台) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="自選">
+            <td class="stock-cell"><div class='stock-main'>3264 欣銓</div><div class='stock-sub'>自選｜AI 90｜現價 221.5｜🟠 偏熱盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏空</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.18x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🟠 偏熱盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>趨勢仍在，但短線已開始偏熱。 空間條件不差，若結構延續，仍有操作彈性。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">219(30M平台) / 218.8(MA20) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">228.5(30M平台) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="記憶體">
+            <td class="stock-cell"><div class='stock-main'>5351 鈺創</div><div class='stock-sub'>記憶體｜AI 88｜現價 80.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 1.42x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">資金開始集中，整理後仍有續攻味道。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。 雖然結構偏強，但這個位置先不要把它當成好追價點。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟢 續強劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開盤守住 76.78(MA20) / 75.2(30M平台)，可先觀察續攻。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若跌回 76.78(MA20) / 75.2(30M平台) 下方且無法快速收復，節奏會先轉弱。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 82.1(30M平台)；若能帶量穿越，代表攻擊延續。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">目前屬於偏積極的結構，空間偏緊，以守支撐觀察續攻為主。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="自選,記憶體">
+            <td class="stock-cell"><div class='stock-main'>2337 旺宏</div><div class='stock-sub'>自選,記憶體｜AI 87｜現價 149.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.34x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 空間條件不差，若結構延續，仍有操作彈性。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 141(30M平台) / 141(前低) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 141(30M平台) / 141(前低) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 152.5(30M平台) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。</div><br></div><br></td>
+        </tr>
+<tr data-cats="光通訊">
+            <td class="stock-cell"><div class='stock-main'>3163 波若威</div><div class='stock-sub'>光通訊｜AI 87｜現價 1145｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 5.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 1060.6(MA20) / 1045(30M平台) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 1060.6(MA20) / 1045(30M平台) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 1179.35(保守壓力) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。</div><br></div><br></td>
+        </tr>
+<tr data-cats="AI伺服器">
+            <td class="stock-cell"><div class='stock-main'>3324 雙鴻</div><div class='stock-sub'>AI伺服器｜AI 87｜現價 1010｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏空</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.66x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 追價報酬效率普通，宜等更明確的突破。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 1000(30M平台) / 939(前低) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 1000(30M平台) / 939(前低) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 1020(大量K) / 1036.08(MA60) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="記憶體">
+            <td class="stock-cell"><div class='stock-main'>4967 十銓</div><div class='stock-sub'>記憶體｜AI 87｜現價 270.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.51x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 追價報酬效率普通，宜等更明確的突破。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 266.5(30M平台) / 261(前低) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 266.5(30M平台) / 261(前低) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 274(30M平台) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="記憶體">
+            <td class="stock-cell"><div class='stock-main'>2344 華邦電</div><div class='stock-sub'>記憶體｜AI 86｜現價 125｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.99x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">資金開始集中，整理後仍有續攻味道。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。 雖然結構偏強，但這個位置先不要把它當成好追價點。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟢 續強劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開盤守住 114(30M平台) / 114(前低)，可先觀察續攻。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若跌回 114(30M平台) / 114(前低) 下方且無法快速收復，節奏會先轉弱。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 128.75(保守壓力)；若能帶量穿越，代表攻擊延續。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">目前屬於偏積極的結構，空間偏緊，以守支撐觀察續攻為主。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="自選,機器人">
+            <td class="stock-cell"><div class='stock-main'>2359 所羅門</div><div class='stock-sub'>自選,機器人｜AI 86｜現價 141｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.76x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">資金開始集中，整理後仍有續攻味道。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。 雖然結構偏強，但這個位置先不要把它當成好追價點。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟢 續強劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開盤守住 133.5(30M平台) / 127.5(前低)，可先觀察續攻。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若跌回 133.5(30M平台) / 127.5(前低) 下方且無法快速收復，節奏會先轉弱。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 145.23(保守壓力)；若能帶量穿越，代表攻擊延續。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">目前屬於偏積極的結構，空間偏緊，以守支撐觀察續攻為主。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="AI伺服器">
+            <td class="stock-cell"><div class='stock-main'>2421 建準</div><div class='stock-sub'>AI伺服器｜AI 86｜現價 158.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.79x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">資金開始集中，整理後仍有續攻味道。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。 雖然結構偏強，但這個位置先不要把它當成好追價點。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟢 續強劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開盤守住 151.5(30M平台) / 146.97(MA20)，可先觀察續攻。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若跌回 151.5(30M平台) / 146.97(MA20) 下方且無法快速收復，節奏會先轉弱。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 160.5(30M平台)；若能帶量穿越，代表攻擊延續。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">目前屬於偏積極的結構，空間偏緊，以守支撐觀察續攻為主。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="封測">
+            <td class="stock-cell"><div class='stock-main'>3265 台星科</div><div class='stock-sub'>封測｜AI 86｜現價 186｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.99x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">資金開始集中，整理後仍有續攻味道。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。 雖然結構偏強，但這個位置先不要把它當成好追價點。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟢 續強劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開盤守住 177.78(MA20) / 177.5(30M平台)，可先觀察續攻。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若跌回 177.78(MA20) / 177.5(30M平台) 下方且無法快速收復，節奏會先轉弱。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 190(30M平台)；若能帶量穿越，代表攻擊延續。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">目前屬於偏積極的結構，空間偏緊，以守支撐觀察續攻為主。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="PCB">
+            <td class="stock-cell"><div class='stock-main'>2368 金像電</div><div class='stock-sub'>PCB｜AI 86｜現價 1330｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 1.67x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 空間條件不差，若結構延續，仍有操作彈性。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 1280(30M平台) / 1235(前低) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 1280(30M平台) / 1235(前低) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 1345(30M平台) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。</div><br></div><br></td>
+        </tr>
+<tr data-cats="ASIC">
+            <td class="stock-cell"><div class='stock-main'>3443 創意</div><div class='stock-sub'>ASIC｜AI 85｜現價 5140｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.45x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 追價報酬效率普通，宜等更明確的突破。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">4990(30M平台) / 4813(MA20) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">5294.2(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。</div><br></div><br></td>
+        </tr>
+<tr data-cats="ASIC">
+            <td class="stock-cell"><div class='stock-main'>6526 達發</div><div class='stock-sub'>ASIC｜AI 84｜現價 725｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 5.50x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 追價報酬效率普通，宜等更明確的突破。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">704(30M平台) / 658.35(MA20) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">746.75(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="自選">
+            <td class="stock-cell"><div class='stock-main'>1513 中興電</div><div class='stock-sub'>自選｜AI 84｜現價 156.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>均線附近</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.65x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">價格先收斂，市場在等方向表態。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟢 續強劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開盤守住 153.5(30M平台) / 152.85(MA20)，可先觀察續攻。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若跌回 153.5(30M平台) / 152.85(MA20) 下方且無法快速收復，節奏會先轉弱。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 157(30M平台)；若能帶量穿越，代表攻擊延續。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">目前屬於偏積極的結構，空間偏緊，以守支撐觀察續攻為主。 空間不算漂亮，追價前要先想清楚風險。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="自選,機器人">
+            <td class="stock-cell"><div class='stock-main'>5443 均豪</div><div class='stock-sub'>自選,機器人｜AI 83｜現價 121.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 1.92x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 追價報酬效率普通，宜等更明確的突破。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 117.5(30M平台) / 116.5(前低) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 117.5(30M平台) / 116.5(前低) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 125.5(30M平台) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。</div><br></div><br></td>
+        </tr>
+<tr data-cats="自選">
+            <td class="stock-cell"><div class='stock-main'>8054 安國</div><div class='stock-sub'>自選｜AI 83｜現價 111.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.65x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 追價報酬效率普通，宜等更明確的突破。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 108(30M平台) / 106.5(前低) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 108(30M平台) / 106.5(前低) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 114.84(保守壓力) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。</div><br></div><br></td>
+        </tr>
+<tr data-cats="AI伺服器">
+            <td class="stock-cell"><div class='stock-main'>2301 光寶科</div><div class='stock-sub'>AI伺服器｜AI 82｜現價 207｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 4.33x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">價格先收斂，市場在等方向表態。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟢 續強劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開盤守住 204.5(30M平台) / 204(前低)，可先觀察續攻。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若跌回 204.5(30M平台) / 204(前低) 下方且無法快速收復，節奏會先轉弱。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 207.5(30M平台)；若能帶量穿越，代表攻擊延續。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">目前屬於偏積極的結構，空間偏緊，以守支撐觀察續攻為主。 空間不算漂亮，追價前要先想清楚風險。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="自選,PCB">
+            <td class="stock-cell"><div class='stock-main'>2367 燿華</div><div class='stock-sub'>自選,PCB｜AI 82｜現價 66.8｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.45x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">價格先收斂，市場在等方向表態。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟢 續強劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開盤守住 64.1(30M平台) / 64(前低)，可先觀察續攻。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若跌回 64.1(30M平台) / 64(前低) 下方且無法快速收復，節奏會先轉弱。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 67.1(30M平台) / 67.81(MA60)；若能帶量穿越，代表攻擊延續。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">目前屬於偏積極的結構，空間偏緊，以守支撐觀察續攻為主。 空間不算漂亮，追價前要先想清楚風險。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="PCB,玻纖布">
+            <td class="stock-cell"><div class='stock-main'>8039 台虹</div><div class='stock-sub'>PCB,玻纖布｜AI 77｜現價 151｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量增｜RV 1.32x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">買盤仍在承接，但追價空間已開始變珍貴。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。 雖然結構偏強，但這個位置先不要把它當成好追價點。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟢 續強劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開盤守住 139(30M平台) / 138.12(MA20)，可先觀察續攻。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若跌回 139(30M平台) / 138.12(MA20) 下方且無法快速收復，節奏會先轉弱。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 151.5(30M平台)；若能帶量穿越，代表攻擊延續。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">目前屬於偏積極的結構，空間偏緊，以守支撐觀察續攻為主。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="玻纖布">
+            <td class="stock-cell"><div class='stock-main'>6213 聯茂</div><div class='stock-sub'>玻纖布｜AI 77｜現價 262｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.41x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 空間條件不差，若結構延續，仍有操作彈性。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 246.5(30M平台) / 236.5(前低) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 246.5(30M平台) / 236.5(前低) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 266.5(30M平台) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。</div><br></div><br></td>
+        </tr>
+<tr data-cats="AI伺服器">
+            <td class="stock-cell"><div class='stock-main'>6669 緯穎</div><div class='stock-sub'>AI伺服器｜AI 72｜現價 5525｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.63x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 追價報酬效率普通，宜等更明確的突破。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">5345(30M平台) / 5076.5(MA20) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">5690.75(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="自選,光通訊">
+            <td class="stock-cell"><div class='stock-main'>4979 華星光</div><div class='stock-sub'>自選,光通訊｜AI 64｜現價 630｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.89x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 追價報酬效率普通，宜等更明確的突破。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">612(MA20) / 585(30M平台) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">648.9(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。</div><br></div><br></td>
+        </tr>
+<tr data-cats="記憶體">
+            <td class="stock-cell"><div class='stock-main'>3260 威剛</div><div class='stock-sub'>記憶體｜AI 63｜現價 417.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.14x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 413(30M平台) / 405.5(前低) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 413(30M平台) / 405.5(前低) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 425(30M平台) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。 空間不算漂亮，追價前要先想清楚風險。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="自選">
+            <td class="stock-cell"><div class='stock-main'>6919 康霈</div><div class='stock-sub'>自選｜AI 63｜現價 104｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>中繼位階</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.83x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 101(前低) / 100.86(MA20) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 101(前低) / 100.86(MA20) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 111.23(MA60) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。 空間不算漂亮，追價前要先想清楚風險。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="ASIC">
+            <td class="stock-cell"><div class='stock-main'>2363 矽統</div><div class='stock-sub'>ASIC｜AI 61｜現價 66.7｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.49x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">62.8(30M平台) / 60.1(前低) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">68.2(30M平台) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="PCB">
+            <td class="stock-cell"><div class='stock-main'>3037 欣興</div><div class='stock-sub'>PCB｜AI 61｜現價 970｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.67x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">905(30M平台) / 859.4(MA20) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">985(30M平台) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="AI伺服器">
+            <td class="stock-cell"><div class='stock-main'>2376 技嘉</div><div class='stock-sub'>AI伺服器｜AI 60｜現價 322.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.68x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">316.5(30M平台) / 303.23(MA20) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">323(30M平台) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="光通訊">
+            <td class="stock-cell"><div class='stock-main'>3450 聯鈞</div><div class='stock-sub'>光通訊｜AI 60｜現價 459.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.91x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">440(30M平台) / 413.5(前低) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">460(30M平台) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="ASIC">
+            <td class="stock-cell"><div class='stock-main'>3661 世芯-KY</div><div class='stock-sub'>ASIC｜AI 60｜現價 4895｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">4790(30M平台) / 4600(前低) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">4905(前高) / 4930(30M平台) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="ASIC,記憶體">
+            <td class="stock-cell"><div class='stock-main'>8299 群聯</div><div class='stock-sub'>ASIC,記憶體｜AI 60｜現價 2430｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。 量縮壓縮味道明顯，等待方向確認即可。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">2335(30M平台) / 2325(MA20) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">2470(30M平台) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。 量縮壓縮味道明顯，等待方向確認即可。</div><br></div><br></td>
+        </tr>
+<tr data-cats="玻纖布">
+            <td class="stock-cell"><div class='stock-main'>2383 台光電</div><div class='stock-sub'>玻纖布｜AI 56｜現價 5005｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.23x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">4704.75(MA20) / 4690(30M平台) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">5075(30M平台) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="記憶體">
+            <td class="stock-cell"><div class='stock-main'>2408 南亞科</div><div class='stock-sub'>記憶體｜AI 56｜現價 310.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.20x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">291.5(30M平台) / 275.52(MA20) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">320(30M平台) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="封測">
+            <td class="stock-cell"><div class='stock-main'>2441 超豐</div><div class='stock-sub'>封測｜AI 56｜現價 117｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.06x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">106.5(30M平台) / 102.5(前低) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">120.51(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="ASIC">
+            <td class="stock-cell"><div class='stock-main'>2454 聯發科</div><div class='stock-sub'>ASIC｜AI 56｜現價 3860｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.06x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">3550(30M平台) / 3230(前低) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">3975.8(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="自選">
+            <td class="stock-cell"><div class='stock-main'>2492 華新科</div><div class='stock-sub'>自選｜AI 56｜現價 292.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.53x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">266(30M平台) / 242(前低) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">301.28(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="PCB">
+            <td class="stock-cell"><div class='stock-main'>3189 景碩</div><div class='stock-sub'>PCB｜AI 56｜現價 609｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.72x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">554(30M平台) / 513.17(MA20) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">627.27(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="封測">
+            <td class="stock-cell"><div class='stock-main'>3711 日月光投控</div><div class='stock-sub'>封測｜AI 56｜現價 561｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 1.94x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">517.12(MA20) / 510(30M平台) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">577.83(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="機器人">
+            <td class="stock-cell"><div class='stock-main'>4562 穎漢</div><div class='stock-sub'>機器人｜AI 56｜現價 42.8｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.22x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">40.6(30M平台) / 40.3(前低) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">44.08(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="機器人">
+            <td class="stock-cell"><div class='stock-main'>4571 鈞興-KY</div><div class='stock-sub'>機器人｜AI 56｜現價 229.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 4.64x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">216(30M平台) / 210.5(前低) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">235.5(30M平台) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="封測">
+            <td class="stock-cell"><div class='stock-main'>6239 力成</div><div class='stock-sub'>封測｜AI 56｜現價 283｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.59x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">257.5(30M平台) / 234.5(前低) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">291.49(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="封測">
+            <td class="stock-cell"><div class='stock-main'>6271 同欣電</div><div class='stock-sub'>封測｜AI 56｜現價 226.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.20x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">206(30M平台) / 187.5(前低) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">233.3(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="PCB">
+            <td class="stock-cell"><div class='stock-main'>8046 南電</div><div class='stock-sub'>PCB｜AI 56｜現價 934｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 2.62x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">895.45(MA20) / 872(30M平台) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">944(30M平台) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="AI伺服器">
+            <td class="stock-cell"><div class='stock-main'>2356 英業達</div><div class='stock-sub'>AI伺服器｜AI 53｜現價 59.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 1.51x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">54(30M平台) / 51.4(前低) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">61.29(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="ASIC">
+            <td class="stock-cell"><div class='stock-main'>3035 智原</div><div class='stock-sub'>ASIC｜AI 53｜現價 211｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 1.54x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">208(30M平台) / 189.5(前低) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">212.5(30M平台) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="PCB">
+            <td class="stock-cell"><div class='stock-main'>4958 臻鼎-KY</div><div class='stock-sub'>PCB｜AI 53｜現價 516｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 1.74x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">469.5(30M平台) / 439(前低) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">531.48(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="封測">
+            <td class="stock-cell"><div class='stock-main'>6147 頎邦</div><div class='stock-sub'>封測｜AI 47｜現價 215.5｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>空｜偏空</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量增｜RV 1.39x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">短線壓回但承接尚在，較像換手整理。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 185.1(MA20) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 185.1(MA20) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 222.5(30M平台) / 222.5(前高) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="光通訊">
+            <td class="stock-cell"><div class='stock-main'>3081 聯亞</div><div class='stock-sub'>光通訊｜AI 47｜現價 2710｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 3.46x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">屬於修復性反彈，重點看壓力能否消化。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🌤 觀察劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">先看 2688(MA20) / 2555(30M平台) 是否守穩，若快速收回，較像整理或洗盤。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若連 2688(MA20) / 2555(30M平台) 都守不住，反彈容易失真。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方先看 2785(30M平台) 是否被消化。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">這一段重點不在追價，而在看賣壓有沒有真正降下來。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="機器人">
+            <td class="stock-cell"><div class='stock-main'>1597 直得</div><div class='stock-sub'>機器人｜AI 40｜現價 183｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.76x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">166.5(前低) / 166.5(30M平台) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">188.49(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="光通訊">
+            <td class="stock-cell"><div class='stock-main'>4908 前鼎</div><div class='stock-sub'>光通訊｜AI 40｜現價 267｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 1.18x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">243(前低) / 243(30M平台) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">275.01(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="PCB,玻纖布">
+            <td class="stock-cell"><div class='stock-main'>6274 台燿</div><div class='stock-sub'>PCB,玻纖布｜AI 38｜現價 1455｜🌤 觀察盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>高檔延伸</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.30x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>🌤 觀察盤</span></div></td>
+            <td class="script-cell">漲勢仍在，但尾段容易出現震盪。<br>目前較適合觀察確認。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">🟠 高檔劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">若開高但量能跟不上，先視為高檔震盪，不急著追。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">1325(30M平台) / 1251.3(MA20) 一旦失守，容易進入較明顯的修正。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">1498.65(保守壓力) 若無法快速站穩，上方就先當成壓力區。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">趨勢還沒壞，但短線已偏熱，追價的報酬效率開始下降。 空間不算漂亮，追價前要先想清楚風險。</div><br></div><br></td>
+        </tr>
+<tr data-cats="封測">
+            <td class="stock-cell"><div class='stock-main'>6515 穎崴</div><div class='stock-sub'>封測｜AI 35｜現價 8700｜⚠️ 高風險盤</div></td>
+            <td class="multi-cell"><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏空</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>空｜強空</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>低檔乖離</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 1.73x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 高風險盤</span></div></td>
+            <td class="script-cell">反彈已被破壞，若再跌破關鍵位，容易轉弱。<br>風險開始升高，追價要更保守。 空間偏緊，較像要先等確認的盤。</td>
+            <td class="script"><br><div class="script-wrap"><br>  <div class="script-core">⚠️ 風險劇本</div><br>  <div class="script-line"><br>    <span class="line-label line-green">做法</span><br>    <span class="line-text">反彈到 8810(大量K) / 9510(30M平台) 若不過，容易仍在弱勢節奏中。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-red">防守</span><br>    <span class="line-text">若 8695(大量K) / 8615(30M平台) 失守，短線風險會再升高。</span><br>  </div><br>  <div class="script-line"><br>    <span class="line-label line-blue">目標</span><br>    <span class="line-text">上方壓力暫時當成調節區，不宜過度樂觀。</span><br>  </div><br>  <div class="script-row"><br>    <span class="tag tag-green">明日若直接跳空過大，先不追價。</span><br>  </div><br>  <div class="script-summary">目前以風險控管為先，除非重新站回關鍵位，否則不宜想得太快。 盤面風險升高，先以保守應對為主。</div><br></div><br></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="sub" style="margin-top:12px;">自動產生時間：2026-05-24 17:32</div>
+</div>
+
+<script>
+  const buttons = document.querySelectorAll('.btn');
+  const searchBox = document.getElementById('searchBox');
+  const rows = document.querySelectorAll('tbody tr[data-cats]');
+
+  function applyFilter() {
+    const activeBtn = document.querySelector('.btn.active');
+    const cat = activeBtn ? activeBtn.dataset.cat : '全部';
+    const q = (searchBox.value || '').toLowerCase().trim();
+
+    rows.forEach(row => {
+      const cats = row.dataset.cats || '';
+      const text = row.innerText.toLowerCase();
+      const catOk = (cat === '全部') || cats.includes(cat);
+      const qOk = !q || text.includes(q);
+      row.style.display = (catOk && qOk) ? '' : 'none';
+    });
+  }
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyFilter();
+    });
+  });
+
+  searchBox.addEventListener('input', applyFilter);
+</script>
+
+</body>
+</html>
