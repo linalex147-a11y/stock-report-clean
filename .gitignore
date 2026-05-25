@@ -16,3 +16,8 @@ report_out/
 
 下載/
 *.exe
+
+*.pkl
+*.sqlite
+*.db
+*.zip
