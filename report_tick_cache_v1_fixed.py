@@ -4,20 +4,38 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import traceback
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+import html as html_lib
+import importlib.util
 
 import pandas as pd
 import requests
 
-import importlib
-
-BASE_REPORT_MODULE = "report_tick_base_compat"
-base = importlib.import_module(BASE_REPORT_MODULE)
+import report_tick_human_v5 as base
 from config import Config
 from market_cache import MarketCache
+
+
+REPORT_DIR = Path(__file__).resolve().parent
+REPORT_CONFIG_PATH = REPORT_DIR / "report_config_tick_v1.py"
+
+
+def _load_report_config():
+    if not REPORT_CONFIG_PATH.exists():
+        return None
+    spec = importlib.util.spec_from_file_location("_report_config_tick_v1_runtime", REPORT_CONFIG_PATH)
+    if spec is None or spec.loader is None:
+        return None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return getattr(module, "報表設定", None)
+
+
+RUNTIME_REPORT_CONFIG = _load_report_config()
 
 
 # =========================================================
@@ -35,6 +53,8 @@ CACHE = MarketCache(
 # =========================================================
 
 def _cfg(name: str, default=None):
+    if RUNTIME_REPORT_CONFIG is not None and hasattr(RUNTIME_REPORT_CONFIG, name):
+        return getattr(RUNTIME_REPORT_CONFIG, name)
     return getattr(base.報表設定, name, default)
 
 
@@ -278,7 +298,7 @@ def _載入K棒(symbol: str, loader) -> Tuple[Optional[pd.DataFrame], Dict[str, 
         loader=loader,
         start=start,
         end=end,
-        force_refresh_today=False,
+        force_refresh_today=True,
     )
     meta = {
         "source": info.source,
@@ -294,16 +314,62 @@ def _載入K棒(symbol: str, loader) -> Tuple[Optional[pd.DataFrame], Dict[str, 
     return df5, meta
 
 
+def _complete_regular_session(df5: pd.DataFrame) -> pd.DataFrame:
+    morning = df5.between_time("09:00", "11:30").copy()
+    afternoon = df5.between_time("13:00", "13:30").copy()
+    return pd.concat([morning, afternoon]).sort_index()
+
+
+def _daily_rv_debug(symbol: str, df5: pd.DataFrame, df_day: pd.DataFrame, cache_meta: Dict[str, str]) -> tuple[str, float]:
+    latest_volume = float(df_day["volume"].iloc[-1])
+    prev_volumes = [float(v) for v in df_day["volume"].iloc[-11:-1].tolist()]
+    avg_volume = sum(prev_volumes) / len(prev_volumes) if prev_volumes else 0.0
+    rv = latest_volume / avg_volume if avg_volume > 0 else 1.0
+    print("[RV DEBUG]")
+    print(f"symbol={symbol}")
+    print(f"daily_latest_volume={latest_volume}")
+    print(f"daily_prev_volumes={prev_volumes}")
+    print(f"daily_avg_volume={avg_volume}")
+    print(f"rv={rv:.4f}")
+    print(f"data_last_datetime={df5.index[-1] if len(df5) else ''}")
+    print(f"daily_bar_count={len(df_day)}")
+    print(f"cache_hit={cache_meta.get('source') == 'cache'}")
+    print(f"cache_file={cache_meta.get('path', '')}")
+    return ("放量" if rv >= 1.2 else "量縮"), rv
+
+
+def _market_state(結構結果: str) -> str:
+    return {
+        "主升多": "初升",
+        "末升段": "末升",
+        "多方壓縮": "洗盤",
+        "多方回檔": "洗盤",
+        "高檔強多轉弱": "轉弱",
+        "高檔出貨": "出貨",
+        "空方反彈": "反彈",
+        "空方壓縮": "空方壓縮",
+        "主跌空": "空方",
+        "跌深反彈後轉弱": "反彈失敗",
+        "橫盤壓縮": "盤整",
+    }.get(結構結果, 結構結果)
+
+
+def _tone_class(score: int, 結構結果: str) -> str:
+    if score >= 80 and 結構結果 == "主升多":
+        return "tone-long"
+    if score >= 65:
+        return "tone-watch"
+    return "tone-risk"
+
+
 def _analyze(symbol: str, loader):
     name = _股票池().get(symbol, symbol)
     df5, cache_meta = _載入K棒(symbol, loader)
     if df5 is None or len(df5) < 30:
         return None
 
-    # 只保留正規交易時間，避免午休造成假30M
-    df5 = df5.between_time("09:00", "11:30").copy()
-    afternoon = df5.between_time("13:00", "13:30").copy()
-    df5 = pd.concat([df5, afternoon]).sort_index()
+    # 只保留正規交易時間，避免午休造成假30M；上午與下午必須先分開取再合併。
+    df5 = _complete_regular_session(df5)
 
     if len(df5) < 30:
         return None
@@ -332,7 +398,7 @@ def _analyze(symbol: str, loader):
     壓力_list, 支撐_list = base._價格列表(現價, 前高, 大量high, 平台高, 前低, 大量low, 平台低, 日ma20, 日ma60)  # type: ignore[attr-defined]
     壓力文字, 支撐文字 = base._壓力支撐文字(壓力_list, 支撐_list)  # type: ignore[attr-defined]
 
-    量價 = base._量價(df5, df30)  # type: ignore[attr-defined]
+    量價, daily_rv = _daily_rv_debug(symbol, df5, df_day, cache_meta)
     節奏30 = base._節奏(df30)  # type: ignore[attr-defined]
     高低結構30 = base._高低結構(df30)  # type: ignore[attr-defined]
     高低結構日 = base._高低結構(df_day)  # type: ignore[attr-defined]
@@ -346,7 +412,7 @@ def _analyze(symbol: str, loader):
     except Exception:
         rr = 0.0
 
-    sector = _main_sector(symbol)
+    sector = _row_cats(symbol)
     sector_scores = []  # 之後會在產生報表時統計，先用暫值
     暫算族群平均 = 0.0
 
@@ -357,7 +423,8 @@ def _analyze(symbol: str, loader):
     市場溫度 = _市場溫度(ai_score, rr)
 
     if 結構結果 in ("主升多", "末升段"):
-        暫看 = "等突破" if (壓力_list and 壓力_list[0] and 壓力_list[0] > 現價) else "可續抱"
+        第一壓力價, 第一壓力來源 = 壓力_list[0] if 壓力_list else (None, None)
+        暫看 = "等突破" if (第一壓力價 is not None and 第一壓力價 > 現價) else "可續抱"
     elif 結構結果 in ("主跌空", "高檔出貨", "高檔強多轉弱"):
         暫看 = "偏保守"
     elif 結構結果 in ("多方回檔", "空方反彈"):
@@ -385,7 +452,7 @@ def _analyze(symbol: str, loader):
         f"日K：{日方向}｜{日強弱}\n"
         f"30M：{三十分方向}｜{三十分強弱}\n"
         f"位階：{市場位階}\n"
-        f"量能：{量價}｜RV {float(df30['volume'].iloc[-1] / max(1.0, float(df30['VMA10'].iloc[-1]))):.2f}x\n"
+        f"量能：{量價}｜RV {daily_rv:.2f}x\n"
         f"主力：{主力痕跡}"
     )
 
@@ -405,14 +472,24 @@ def _analyze(symbol: str, loader):
         "族群": sector,
         "現價": _round(現價),
         "AI分數": ai_score,
+        "盤勢": 市場溫度,
         "交易狀態": 交易狀態,
         "市場溫度": 市場溫度,
+        "日K方向": f"{日方向}｜{日強弱}",
+        "30分K方向": f"{三十分方向}｜{三十分強弱}",
+        "支撐": 支撐文字,
+        "壓力": 壓力文字,
+        "RR": rr_text,
+        "量價判讀": f"{量價}｜RV {daily_rv:.2f}x｜{節奏30}",
+        "市場狀態": _market_state(結構結果),
         "多週期判讀": 多週期判讀,
         "情境提醒": 情境提醒,
         "AI策略劇本": AI策略劇本,
         "關鍵撐壓 / RR": 關鍵撐壓RR,
         "_cats": _row_cats(symbol),
         "_sort": base._結構排序(結構結果),  # type: ignore[attr-defined]
+        "_rr_value": rr,
+        "_tone": _tone_class(ai_score, 結構結果),
     }
 
 
@@ -638,13 +715,213 @@ def _html(df: pd.DataFrame, path: str) -> None:
     Path(path).write_text(html, encoding="utf-8")
 
 
+def _e(value) -> str:
+    return html_lib.escape(str(value if value is not None else "-"), quote=True)
+
+
+def _sector_status(avg_score: float) -> tuple[str, str]:
+    if avg_score >= 80:
+        return "主流", "sector-hot"
+    if avg_score >= 65:
+        return "偏強", "sector-warm"
+    if avg_score >= 50:
+        return "整理", "sector-neutral"
+    return "偏弱", "sector-cool"
+
+
+def _sector_rows(df: pd.DataFrame) -> list[dict]:
+    rows: list[dict] = []
+    for cat in _分類設定().keys():
+        members = df[df["_cats"].astype(str).str.split(",").apply(lambda items: cat in items)]
+        if len(members) == 0:
+            continue
+        members = members.sort_values(["AI分數", "_rr_value"], ascending=[False, False])
+        avg = float(members["AI分數"].mean())
+        status, css = _sector_status(avg)
+        rows.append({
+            "族群": cat,
+            "平均分數": avg,
+            "狀態": status,
+            "css": css,
+            "代表股": str(members.iloc[0]["股票"]),
+            "成員數": int(len(members)),
+        })
+    return sorted(rows, key=lambda item: (item["平均分數"], item["成員數"]), reverse=True)
+
+
+def _sector_cards_table(df: pd.DataFrame) -> str:
+    rows = _sector_rows(df)
+    if not rows:
+        return "<tr><td colspan='5' class='empty'>無族群資料</td></tr>"
+    return "\n".join(
+        f"<tr><td>{_e(row['族群'])}</td><td><strong>{row['平均分數']:.1f}</strong></td>"
+        f"<td><span class=\"sector-badge {row['css']}\">{_e(row['狀態'])}</span></td>"
+        f"<td>{_e(row['代表股'])}</td><td>{row['成員數']}</td></tr>"
+        for row in rows
+    )
+
+
+def _dashboard_html(df: pd.DataFrame, sector_rows: list[dict]) -> str:
+    avg = float(df["AI分數"].mean()) if len(df) else 0.0
+    strong_ratio = int(round(100 * len(df[df["AI分數"] >= 70]) / max(1, len(df))))
+    if avg >= 80:
+        mood = "🔥 強勢多方"
+    elif avg >= 65:
+        mood = "🌤 中性偏多"
+    elif avg >= 50:
+        mood = "🌥 盤整觀察"
+    else:
+        mood = "⚠️ 保守防守"
+    strongest_sector = sector_rows[0]["族群"] if sector_rows else "-"
+    strongest_stock = str(df.sort_values(["AI分數", "_rr_value"], ascending=[False, False]).iloc[0]["股票"]) if len(df) else "-"
+    risk_count = int(len(df[df["AI分數"] < 50])) if len(df) else 0
+    attack_count = int(len(df[df["AI分數"] >= 80])) if len(df) else 0
+    return f"""
+  <div class="dash-grid">
+    <div class="dash-card"><div class="dash-k">市場情緒</div><div class="dash-v">{_e(mood)}</div><div class="dash-s">平均分數 {avg:.1f}｜強勢比 {strong_ratio}%</div></div>
+    <div class="dash-card"><div class="dash-k">最強族群</div><div class="dash-v">{_e(strongest_sector)}</div><div class="dash-s">攻擊盤 {attack_count}｜風險 {risk_count}</div></div>
+    <div class="dash-card"><div class="dash-k">最強股票</div><div class="dash-v">{_e(strongest_stock)}</div><div class="dash-s">依 AI 分數與 RR 排序</div></div>
+    <div class="dash-card"><div class="dash-k">整體平均</div><div class="dash-v">{avg:.1f}</div><div class="dash-s">族群 {len(sector_rows)} 個｜股票 {len(df)} 檔</div></div>
+  </div>
+"""
+
+
+def _html(df: pd.DataFrame, path: str) -> None:
+    buttons = '<button class="btn active" data-cat="全部">全部</button>\n'
+    for cat in _分類設定().keys():
+        buttons += f'<button class="btn" data-cat="{_e(cat)}">{_e(cat)}</button>\n'
+
+    sectors = _sector_rows(df)
+    sector_rows = _sector_cards_table(df)
+    dashboard = _dashboard_html(df, sectors)
+    cards_html = ""
+    sorted_df = df.sort_values(["AI分數", "_rr_value", "_sort", "股票"], ascending=[False, False, True, True])
+    for _, row in sorted_df.iterrows():
+        script_html = _e(row.get("AI策略劇本", "-")).replace("\n", "<br>")
+        cards_html += f"""
+        <article class="stock-card {_e(row.get('_tone', 'tone-risk'))}" data-cats="{_e(row.get('_cats',''))}">
+          <header class="card-head">
+            <div>
+              <h2>{_e(row.get("股票","-"))}</h2>
+              <div class="sector">{_e(row.get("族群","-"))}</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>{_e(row.get("AI分數","-"))}</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">{_e(row.get("盤勢","-"))}</span><span class="pill soft">{_e(row.get("交易狀態","-"))}</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>{_e(row.get("現價","-"))}</strong></div>
+            <div class="field"><span>日K方向</span><strong>{_e(row.get("日K方向","-"))}</strong></div>
+            <div class="field"><span>30分K方向</span><strong>{_e(row.get("30分K方向","-"))}</strong></div>
+            <div class="field"><span>支撐</span><strong>{_e(row.get("支撐","-"))}</strong></div>
+            <div class="field"><span>壓力</span><strong>{_e(row.get("壓力","-"))}</strong></div>
+            <div class="field"><span>RR</span><strong>{_e(row.get("RR","-"))}</strong></div>
+            <div class="field"><span>量價判讀</span><strong>{_e(row.get("量價判讀","-"))}</strong></div>
+            <div class="field"><span>市場狀態</span><strong>{_e(row.get("市場狀態","-"))}</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>{script_html}</p></section>
+        </article>
+"""
+
+    update_label = _now_str()
+    html = f"""<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI多週期盤後結構報表</title>
+<style>
+  :root {{--bg:#f5f7fb;--panel:#ffffff;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--green:#0f766e;--green-soft:#ecfdf5;--red:#dc2626;--red-soft:#fef2f2;--blue:#2563eb;--blue-soft:#eff6ff;--gray-soft:#f3f4f6;--dark:#172033;}}
+  body {{font-family:"Segoe UI","Microsoft JhengHei",Arial,sans-serif;background:var(--bg);margin:0;padding:20px;color:var(--text);}}
+  .container {{max-width:1800px;margin:auto;}}
+  .topbar {{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px;}}
+  .brand h1 {{margin:0 0 8px;font-size:28px;line-height:1.2;}} .sub {{color:var(--muted);margin:0;font-size:13px;}}
+  .update-card,.dash-card,.section {{background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 24px rgba(15,23,42,.08);}}
+  .update-card {{padding:12px 16px;min-width:280px;}}
+  .update-title {{font-weight:900;color:var(--dark);}} .update-sub,.dash-s {{color:var(--muted);font-size:12px;margin-top:3px;}}
+  .dash-grid {{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:12px 0 18px;}}
+  .dash-card {{padding:14px 16px;}} .dash-k {{color:var(--muted);font-size:12px;font-weight:900;}} .dash-v {{font-size:20px;font-weight:900;margin-top:6px;}}
+  .toolbar {{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0;}}
+  .btn {{padding:9px 14px;border:none;border-radius:999px;cursor:pointer;background:#e5e7eb;font-size:13px;font-weight:800;color:#1f2937;}}
+  .btn.active {{background:#2563eb;color:white;}} .search {{margin-left:auto;min-width:260px;max-width:360px;width:100%;padding:10px 14px;border-radius:999px;border:1px solid #d7dee8;font-size:14px;background:white;outline:none;}}
+  .section {{margin-bottom:16px;overflow:hidden;}} .section-head {{padding:14px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#fff,#f8fafc);}}
+  .section-title {{font-weight:900;font-size:18px;color:var(--dark);}} .section-sub {{font-size:12px;color:var(--muted);margin-top:3px;}}
+  .sector-wrap {{padding:16px;overflow:auto;}} table {{width:100%;border-collapse:collapse;min-width:760px;}} th {{background:#172033;color:white;padding:12px 10px;text-align:left;white-space:nowrap;}} td {{padding:12px 10px;border-bottom:1px solid var(--border);}}
+  .sector-badge {{display:inline-flex;padding:6px 10px;border-radius:999px;font-weight:800;font-size:12px;}}
+  .sector-hot {{background:#dcfce7;color:#166534;}} .sector-warm {{background:#fff7ed;color:#9a3412;}} .sector-neutral {{background:#eff6ff;color:#1d4ed8;}} .sector-cool {{background:#f3f4f6;color:#4b5563;}}
+  .card-grid-wrap {{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:14px;padding:16px;}}
+  .stock-card {{border:1px solid var(--border);border-radius:16px;padding:14px;background:#fff;display:grid;gap:12px;border-left:6px solid #94a3b8;}}
+  .stock-card.tone-long {{border-left-color:var(--green);}} .stock-card.tone-risk {{border-left-color:var(--red);}} .stock-card.tone-watch {{border-left-color:var(--blue);}}
+  .card-head {{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;}}
+  .card-head h2 {{margin:0;font-size:20px;line-height:1.2;}} .sector {{color:var(--muted);font-size:13px;margin-top:4px;font-weight:700;}}
+  .score-box {{background:#f8fafc;border:1px solid var(--border);border-radius:12px;min-width:86px;text-align:center;padding:8px;}} .score-box span {{display:block;color:var(--muted);font-size:11px;font-weight:800;}} .score-box strong {{font-size:22px;}}
+  .status-row {{display:flex;gap:8px;flex-wrap:wrap;}} .pill {{display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;background:var(--green-soft);color:#166534;font-weight:900;font-size:13px;}} .pill.soft {{background:var(--blue-soft);color:#1d4ed8;}}
+  .card-grid {{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}} .field {{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:9px 10px;}} .field span {{display:block;color:var(--muted);font-size:11px;font-weight:900;margin-bottom:4px;}} .field strong {{font-size:13px;line-height:1.45;}}
+  .script-box {{border-top:1px solid var(--border);padding-top:10px;}} .script-title {{font-weight:900;margin-bottom:6px;color:var(--dark);}} .script-box p {{margin:0;line-height:1.65;font-size:14px;}}
+  .empty {{padding:18px;color:var(--muted);text-align:center;}}
+  @media (max-width:900px) {{body {{padding:12px;}} .dash-grid {{grid-template-columns:1fr 1fr;}} .search {{margin-left:0;min-width:100%;}} .card-grid-wrap {{grid-template-columns:1fr;padding:12px;}} .brand h1 {{font-size:23px;}}}}
+  @media (max-width:560px) {{.dash-grid {{grid-template-columns:1fr;}} .card-grid {{grid-template-columns:1fr;}} .card-head {{align-items:stretch;}} .score-box {{min-width:72px;}} body {{padding:8px;}}}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="topbar"><div class="brand"><h1>📊 AI多週期盤後結構報表</h1><p class="sub">手機友善 card 版，保留分類、族群、AI分數、支撐壓力與劇本判讀</p></div><div class="update-card"><div class="update-title">更新時間：{update_label}</div><div class="update-sub">每日盤後自動執行同步</div></div></div>
+  {dashboard}
+  <div class="section"><div class="section-head"><div class="section-title">族群強弱總表</div><div class="section-sub">依各族群成員的 AI 分數平均計算</div></div><div class="sector-wrap"><table><thead><tr><th>族群</th><th>平均分數</th><th>狀態</th><th>代表股</th><th>成員數</th></tr></thead><tbody>{sector_rows}</tbody></table></div></div>
+  <div class="toolbar">{buttons}<input id="searchBox" class="search" type="text" placeholder="搜尋股票、族群、狀態、劇本..."></div>
+  <div class="section"><div class="section-head"><div class="section-title">個股 AI 盤後卡片</div><div class="section-sub">一檔股票一張 card，手機一列一張；排序：AI分數、RR、結構排序</div></div><div class="card-grid-wrap">{cards_html}</div></div>
+  <div class="sub" style="margin-top:12px;">自動產生時間：{_now_str()}</div>
+</div>
+<script>
+(function() {{
+  const buttons = document.querySelectorAll('.btn');
+  const searchBox = document.getElementById('searchBox');
+  const cards = document.querySelectorAll('.stock-card[data-cats]');
+  function applyFilter() {{
+    const activeBtn = document.querySelector('.btn.active');
+    const cat = activeBtn ? activeBtn.dataset.cat : '全部';
+    const q = (searchBox.value || '').toLowerCase().trim();
+    cards.forEach(card => {{
+      const cats = card.dataset.cats || '';
+      const text = card.innerText.toLowerCase();
+      const catOk = cat === '全部' || cats.split(',').includes(cat);
+      const textOk = !q || text.includes(q);
+      card.style.display = (catOk && textOk) ? '' : 'none';
+    }});
+  }}
+  buttons.forEach(btn => btn.addEventListener('click', () => {{buttons.forEach(b => b.classList.remove('active')); btn.classList.add('active'); applyFilter();}}));
+  searchBox.addEventListener('input', applyFilter);
+}})();
+</script>
+</body>
+</html>
+"""
+    Path(path).write_text(html, encoding="utf-8")
+
+
+def _tg_value(name: str, cfg: Config):
+    report_value = _cfg(name, "")
+    if str(report_value).strip():
+        return str(report_value).strip(), str(REPORT_CONFIG_PATH)
+    return str(getattr(cfg, name, "")).strip(), str(REPORT_DIR / "config.py")
+
+
+def _log_tg_config(token: str, chat_id: str, config_file: str) -> None:
+    print(f"[TG CONFIG] config_file={config_file}")
+    print(f"[TG CONFIG] token_len={len(token)}")
+    print(f"[TG CONFIG] token_start={token[:6] if token else ''}")
+    print(f"[TG CONFIG] token_end={token[-4:] if token else ''}")
+    print(f"[TG CONFIG] chat_id={chat_id}")
+
+
 def _send_tg(html_path: str, cfg: Config) -> None:
     try:
         if not bool(_cfg("發送HTML到TG", True)):
             return
 
-        token = str(getattr(cfg, "TG_TOKEN", "")).strip()
-        chat_id = str(getattr(cfg, "TG_CHAT_ID", "")).strip()
+        token, token_config_file = _tg_value("TG_TOKEN", cfg)
+        chat_id, chat_config_file = _tg_value("TG_CHAT_ID", cfg)
+        config_file = token_config_file if token else chat_config_file
+        _log_tg_config(token, chat_id, config_file)
         if not token or not chat_id or token == "*" or chat_id == "*":
             print("⚠️ TG 金鑰未配置完整，略過 TG 報表發送。")
             return
@@ -663,10 +940,12 @@ def _send_tg(html_path: str, cfg: Config) -> None:
 
         if r.status_code == 200:
             print("📨 HTML 報表已成功發送至 TG 頻道")
+        elif r.status_code == 401:
+            print("⚠️ TG 發送失敗：401 Unauthorized，Token 無效。")
         else:
-            print(f"❌ TG 發送失敗: {r.text}")
+            print(f"⚠️ TG 發送失敗: HTTP {r.status_code} {r.text}")
     except Exception as e:
-        print(f"❌ TG 發送發生未預期錯誤: {e}")
+        print(f"⚠️ TG 發送發生未預期錯誤，不阻止 GitHub Pages 上傳: {e}")
 
 
 def _git_sync() -> None:
@@ -734,6 +1013,7 @@ def 產生報表():
                     print(f"  {symbol} ❌ 資料不足 / 讀取失敗")
             except Exception as e:
                 print(f"  {symbol} ❌ 發生未預期錯誤: {e}")
+                print(traceback.format_exc())
     finally:
         loader.logout()
 
