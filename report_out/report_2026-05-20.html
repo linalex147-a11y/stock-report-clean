@@ -1,0 +1,1799 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 短波段精密交易決策系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg-primary: #0f172a;
+    --card-bg: #1e293b;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --primary: #3b82f6;
+    --primary-light: #1e3a8a;
+    
+    --color-up: #ef4444;
+    --color-up-bg: #451a1a;
+    --color-down: #10b981;
+    --color-down-bg: #064e3b;
+    
+    --border-color: #334155;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-main);
+    line-height: 1.6;
+    padding: 24px 16px;
+}
+
+.container {
+    max-width: 1750px;
+    margin: 0 auto;
+}
+
+/* 頂部導覽列 */
+.header {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: white;
+    padding: 32px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    border: 1px solid var(--border-color);
+}
+
+.header-title h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #38bdf8;
+}
+
+.header-title p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.update-time {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #e2e8f0;
+    border: 1px solid var(--border-color);
+}
+
+/* 篩選按鈕卡片 */
+.filter-card {
+    background: var(--card-bg);
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    border: 1px solid var(--border-color);
+}
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.filter-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-right: 8px;
+}
+
+.btn {
+    padding: 8px 18px;
+    border: 1px solid var(--border-color);
+    border-radius: 30px;
+    cursor: pointer;
+    background: #0f172a;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: white;
+}
+
+.btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+}
+
+/* 表格容器與設計 */
+.table-container {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    min-width: 1350px;
+}
+
+th {
+    background-color: #0f172a;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 16px 20px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+td {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.95rem;
+    vertical-align: top;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover {
+    background-color: #1e293b90;
+}
+
+/* 股票樣式 */
+.stock-cell {
+    display: flex;
+    flex-direction: column;
+}
+
+.stock-id {
+    font-weight: 700;
+    color: #38bdf8;
+    font-size: 1.05rem;
+}
+
+.stock-name {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* 現價樣式 */
+.price-cell {
+    display: flex;
+    flex-direction: column;
+}
+
+.price-val {
+    font-weight: 700;
+    color: var(--text-main);
+    font-size: 1.1rem;
+}
+
+.completed-tag {
+    font-size: 0.7rem;
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 1px 4px;
+    border-radius: 4px;
+    width: max-content;
+    margin-top: 3px;
+}
+
+/* 交易狀態標籤 (大版) */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.status-gap-critical { background-color: #ef4444; color: white; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2); }
+.status-space-short { background-color: #f59e0b; color: #0f172a; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2); }
+.status-bull-state { background-color: var(--color-up-bg); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+.status-neutral-state { background-color: #334155; color: #cbd5e1; }
+
+.pressure-cell { color: #fca5a5; font-weight: 600; font-size: 0.88rem; }
+.support-cell { color: #a7f3d0; font-weight: 600; font-size: 0.88rem; }
+
+/* 核心交易劇本樣式 */
+.script-cell {
+    max-width: 650px;
+}
+
+.decision-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.script-line {
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    width: max-content;
+}
+
+.script-line.bull { background-color: var(--color-up-bg); color: #fca5a5; border-left: 4px solid var(--color-up); }
+.script-line.bear { background-color: #334155; color: #cbd5e1; border-left: 4px solid #94a3b8; }
+.script-line.warning { background-color: rgba(245, 158, 11, 0.15); color: #fde047; border-left: 4px solid #eab308; }
+.script-line.critical { background-color: rgba(239, 68, 68, 0.2); color: #fca5a5; border-left: 4px solid #ef4444; }
+.script-line.defensive { background-color: #1e293b; color: #e2e8f0; border-left: 4px solid #94a3b8; font-size: 0.85rem; }
+
+.badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.script-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: inline-block;
+}
+
+.script-badge.status-rr { background-color: #064e3b; color: #a7f3d0; border: 1px solid #10b981; }
+.script-badge.status-gap-info { background-color: #0f172a; color: #94a3b8; border: 1px solid var(--border-color); }
+
+.story-text {
+    color: #cbd5e1;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    background: #0f172a;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border-left: 3px solid var(--primary);
+}
+
+@media (max-width: 768px) {
+    .header {
+        padding: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .header-title h1 { font-size: 1.5rem; }
+    .update-time { align-self: flex-start; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <div class="header-title">
+            <h1>📊 AI 短波段精密交易決策系統</h1>
+            <p>雙時間框架過濾（日K MA20方向 ➔ 30分Close-based平台結構 ➔ 5分K動能觸發），整合極致風控指標</p>
+        </div>
+        <div class="update-time">
+            決策快照：2026-05-20 17:19
+        </div>
+    </header>
+
+    <div class="filter-card">
+        <div class="toolbar">
+            <span class="filter-label">監控分類：</span>
+            <button class="btn active" data-cat="全部">✨ 全部標的</button>
+<button class="btn" data-cat="自選">自選</button>
+<button class="btn" data-cat="AI伺服器">AI伺服器</button>
+<button class="btn" data-cat="ASIC">ASIC</button>
+<button class="btn" data-cat="PCB">PCB</button>
+<button class="btn" data-cat="記憶體">記憶體</button>
+<button class="btn" data-cat="光通訊">光通訊</button>
+<button class="btn" data-cat="機器人">機器人</button>
+<button class="btn" data-cat="玻纖布">玻纖布</button>
+
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>標的資訊</th>
+                    <th>離市現價</th>
+                    <th>交易決策狀態</th>
+                    <th>關鍵壓力（平台高/前高/季線）</th>
+                    <th>關鍵支撐（平台低/前低/月線）</th>
+                    <th>明日「精準風報比」與 30分K 防守策略</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+<tr data-cats="自選,機器人">
+    <td class="stock-cell">
+        <span class="stock-id">5443</span>
+        <span class="stock-name">均豪</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">116.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">119.5(平台高) / 131(前高)</td>
+    <td class="support-cell">114.5(平台低) / 109.13(季線大撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 3.02%。</div>
+        <div class="script-line defensive">做空參考：反彈到 119.5 不過可偏空；先看 114.5。</div>
+        <div class="script-line defensive">防守線先看 114.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 3.02%｜回檔風險 1.29%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="自選">
+    <td class="stock-cell">
+        <span class="stock-id">2492</span>
+        <span class="stock-name">華新科</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">241.5</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-bull-state">💤 偏多｜平台整理</span></td>
+    <td class="pressure-cell">-</td>
+    <td class="support-cell">220(平台低) / 206(前低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line bull">明天偏強看待｜先等 241.5 附近站穩，再考慮做多。</div>
+        <div class="script-line defensive">做多參考：先等平台穩住，再看有沒有續攻機會。</div>
+        <div class="script-line defensive">防守線先看 220；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">回檔風險 8.9%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">目前還在平台裡整理，明天只要量能跟上、站穩平台高，才比較有機會往上走。</div>
+    </td>
+</tr>
+
+<tr data-cats="自選">
+    <td class="stock-cell">
+        <span class="stock-id">8054</span>
+        <span class="stock-name">安國</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">107.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">110.5(平台高)</td>
+    <td class="support-cell">105.5(平台低) / 104.14(季線大撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 3.27%。</div>
+        <div class="script-line defensive">做空參考：反彈到 110.5 不過可偏空；先看 105.5。</div>
+        <div class="script-line defensive">防守線先看 105.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 3.27%｜回檔風險 1.4%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="自選,記憶體">
+    <td class="stock-cell">
+        <span class="stock-id">2337</span>
+        <span class="stock-name">旺宏</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">141.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">144(平台高) / 162.5(前高)</td>
+    <td class="support-cell">138.5(平台低) / 134.9(季線大撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 2.13%。</div>
+        <div class="script-line defensive">做空參考：反彈到 144 不過可偏空；先看 138.5。</div>
+        <div class="script-line defensive">防守線先看 138.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 2.13%｜回檔風險 1.77%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="自選,PCB">
+    <td class="stock-cell">
+        <span class="stock-id">2367</span>
+        <span class="stock-name">燿華</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">64.2</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-gap-critical">⚡ 跳空過大｜防追高</span></td>
+    <td class="pressure-cell">64.3(前高) / 67.74(季線大壓)</td>
+    <td class="support-cell">63.1(平台低) / 61.93(月線支撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line critical">明天如果直接跳空開高 2.37%，先不要追，等 30 分鐘收完再看。</div>
+        <div class="script-line defensive">做空參考：反彈到 64.3 不過可偏空；先看 63.1。</div>
+        <div class="script-line defensive">防守線先看 63.1；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 0.16%｜回檔風險 1.71%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">明早跳空已經把節奏打亂，先不要急著追，等 30 分鐘收盤後再決定方向。</div>
+    </td>
+</tr>
+
+<tr data-cats="自選">
+    <td class="stock-cell">
+        <span class="stock-id">6919</span>
+        <span class="stock-name">康霈</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">101.5</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-gap-critical">⚡ 跳空過大｜防追高</span></td>
+    <td class="pressure-cell">104(前高) / 107(平台高)</td>
+    <td class="support-cell">101.5(平台低) / 94.9(前低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line critical">明天如果直接跳空開高 2.88%，先不要追，等 30 分鐘收完再看。</div>
+        <div class="script-line defensive">做空參考：反彈到 104 不過可偏空；先看 101.5。</div>
+        <div class="script-line defensive">防守線先看 101.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 2.46%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">明早跳空已經把節奏打亂，先不要急著追，等 30 分鐘收盤後再決定方向。</div>
+    </td>
+</tr>
+
+<tr data-cats="自選,機器人">
+    <td class="stock-cell">
+        <span class="stock-id">2359</span>
+        <span class="stock-name">所羅門</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">127.5</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-bull-state">💤 偏多｜平台整理</span></td>
+    <td class="pressure-cell">135(平台高) / 139(前高)</td>
+    <td class="support-cell">127(平台低) / 121.55(月線支撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line bull">明天偏強看待｜先等 135 附近站穩，再考慮做多。</div>
+        <div class="script-line defensive">做多參考：先看 135；若 30 分鐘 K 收破 127，就先退。</div>
+        <div class="script-line defensive">防守線先看 127；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 5.88%｜回檔風險 0.39%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">目前還在平台裡整理，明天只要量能跟上、站穩平台高，才比較有機會往上走。</div>
+    </td>
+</tr>
+
+<tr data-cats="自選">
+    <td class="stock-cell">
+        <span class="stock-id">1513</span>
+        <span class="stock-name">中興電</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">149.5</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">150(前高) / 155.03(季線大壓)</td>
+    <td class="support-cell">148.5(前低) / 148(平台低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 0.33%。</div>
+        <div class="script-line defensive">做空參考：反彈到 150 不過可偏空；先看 148.5。</div>
+        <div class="script-line defensive">防守線先看 148；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 0.33%｜回檔風險 0.67%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="自選,光通訊">
+    <td class="stock-cell">
+        <span class="stock-id">4979</span>
+        <span class="stock-name">華星光</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">546.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">551(前高) / 560(平台高)</td>
+    <td class="support-cell">523(前低) / 490.98(季線大撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 0.92%。</div>
+        <div class="script-line defensive">做空參考：反彈到 551 不過可偏空；先看 523。</div>
+        <div class="script-line defensive">防守線先看 523；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 0.92%｜回檔風險 4.21%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="自選">
+    <td class="stock-cell">
+        <span class="stock-id">3264</span>
+        <span class="stock-name">欣銓</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">205.5</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-neutral-state">⚠️ 偏空｜跌破尋底</span></td>
+    <td class="pressure-cell">214.5(平台高) / 230(前高)</td>
+    <td class="support-cell">205(平台低) / 178.82(季線大撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line bear">明天仍偏弱｜214.5 沒站回前，反彈先當壓力看。</div>
+        <div class="script-line defensive">做空參考：反彈到 214.5 不過可偏空；先看 205。</div>
+        <div class="script-line defensive">防守線先看 205；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 4.38%｜回檔風險 0.24%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">日K還在偏弱區間，反彈沒站回平台高前，先把壓力看重一點。</div>
+    </td>
+</tr>
+
+<tr data-cats="AI伺服器">
+    <td class="stock-cell">
+        <span class="stock-id">3017</span>
+        <span class="stock-name">奇鋐</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">2340.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">2390(平台高) / 2455(前高)</td>
+    <td class="support-cell">2325(平台低) / 2213.1(季線大撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 2.14%。</div>
+        <div class="script-line defensive">做空參考：反彈到 2390 不過可偏空；先看 2325。</div>
+        <div class="script-line defensive">防守線先看 2325；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 2.14%｜回檔風險 0.64%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="AI伺服器">
+    <td class="stock-cell">
+        <span class="stock-id">3324</span>
+        <span class="stock-name">雙鴻</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">943.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">966(平台高) / 995(前高)</td>
+    <td class="support-cell">938(平台低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 2.44%。</div>
+        <div class="script-line defensive">做空參考：反彈到 966 不過可偏空；先看 938。</div>
+        <div class="script-line defensive">防守線先看 938；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 2.44%｜回檔風險 0.53%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="AI伺服器">
+    <td class="stock-cell">
+        <span class="stock-id">2382</span>
+        <span class="stock-name">廣達</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">292.5</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-gap-critical">⚡ 結構破壞｜開盤破位</span></td>
+    <td class="pressure-cell">293(平台高) / 305.48(季線大壓)</td>
+    <td class="support-cell">290(前低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line critical">明天如果一開就跌破平台低，先別硬接，先看有沒有止穩。</div>
+        <div class="script-line defensive">做空參考：反彈到 293 不過可偏空；先看 290。</div>
+        <div class="script-line defensive">防守線先看 290；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 0.17%｜回檔風險 0.85%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">明早跳空已經把節奏打亂，先不要急著追，等 30 分鐘收盤後再決定方向。</div>
+    </td>
+</tr>
+
+<tr data-cats="AI伺服器">
+    <td class="stock-cell">
+        <span class="stock-id">3231</span>
+        <span class="stock-name">緯創</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">132.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">134.23(季線大壓) / 134.5(平台高)</td>
+    <td class="support-cell">132(平台低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 1.69%。</div>
+        <div class="script-line defensive">做空參考：反彈到 134.23 不過可偏空；先看 132。</div>
+        <div class="script-line defensive">防守線先看 132；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 1.69%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="AI伺服器">
+    <td class="stock-cell">
+        <span class="stock-id">2376</span>
+        <span class="stock-name">技嘉</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">302.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">308(平台高) / 330.5(前高)</td>
+    <td class="support-cell">300.5(平台低) / 298.6(月線支撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 1.99%。</div>
+        <div class="script-line defensive">做多參考：先看 308；若 30 分鐘 K 收破 300.5，就先退。</div>
+        <div class="script-line defensive">防守線先看 300.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 1.99%｜回檔風險 0.5%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="AI伺服器">
+    <td class="stock-cell">
+        <span class="stock-id">2356</span>
+        <span class="stock-name">英業達</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">51.2</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">52.2(前高) / 52.4(平台高)</td>
+    <td class="support-cell">50.7(平台低) / 48.88(月線支撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 1.95%。</div>
+        <div class="script-line defensive">做多參考：先看 52.2；若 30 分鐘 K 收破 50.7，就先退。</div>
+        <div class="script-line defensive">防守線先看 50.7；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 1.95%｜回檔風險 0.98%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="AI伺服器">
+    <td class="stock-cell">
+        <span class="stock-id">2301</span>
+        <span class="stock-name">光寶科</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">205.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">207.5(前高) / 211.5(平台高)</td>
+    <td class="support-cell">204.5(前低) / 203.5(平台低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 1.22%。</div>
+        <div class="script-line defensive">做多參考：先看 207.5；若 30 分鐘 K 收破 204.5，就先退。</div>
+        <div class="script-line defensive">防守線先看 203.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 1.22%｜回檔風險 0.24%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="AI伺服器">
+    <td class="stock-cell">
+        <span class="stock-id">2421</span>
+        <span class="stock-name">建準</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">142.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">145(前高) / 146.5(平台高)</td>
+    <td class="support-cell">142(平台低) / 141.82(季線大撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 2.11%。</div>
+        <div class="script-line defensive">做空參考：反彈到 145 不過可偏空；先看 142。</div>
+        <div class="script-line defensive">防守線先看 142；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 2.11%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="AI伺服器">
+    <td class="stock-cell">
+        <span class="stock-id">6669</span>
+        <span class="stock-name">緯穎</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">4915.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">4930(平台高) / 5115(前高)</td>
+    <td class="support-cell">4890(前低) / 4795(平台低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 0.31%。</div>
+        <div class="script-line defensive">做空參考：反彈到 4930 不過可偏空；先看 4890。</div>
+        <div class="script-line defensive">防守線先看 4795；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 0.31%｜回檔風險 0.51%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="AI伺服器">
+    <td class="stock-cell">
+        <span class="stock-id">3706</span>
+        <span class="stock-name">神達</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">80.1</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">80.7(前高) / 81.31(季線大壓)</td>
+    <td class="support-cell">80.1(平台低) / 79.9(前低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 0.75%。</div>
+        <div class="script-line defensive">做空參考：反彈到 80.7 不過可偏空；先看 80.1。</div>
+        <div class="script-line defensive">防守線先看 80.1；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 0.75%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="ASIC">
+    <td class="stock-cell">
+        <span class="stock-id">3035</span>
+        <span class="stock-name">智原</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">191.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">193(前高) / 193.5(平台高)</td>
+    <td class="support-cell">188.5(前低) / 186.5(平台低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 1.05%。</div>
+        <div class="script-line defensive">做多參考：先看 193；若 30 分鐘 K 收破 188.5，就先退。</div>
+        <div class="script-line defensive">防守線先看 186.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 1.05%｜回檔風險 1.31%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="ASIC">
+    <td class="stock-cell">
+        <span class="stock-id">3661</span>
+        <span class="stock-name">世芯-KY</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">4595.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">4605(前高) / 4665(平台高)</td>
+    <td class="support-cell">4455.75(月線支撐) / 4430(前低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 0.22%。</div>
+        <div class="script-line defensive">做空參考：反彈到 4605 不過可偏空；先看 4455.75。</div>
+        <div class="script-line defensive">防守線先看 4430；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 0.22%｜回檔風險 3.03%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="ASIC">
+    <td class="stock-cell">
+        <span class="stock-id">3443</span>
+        <span class="stock-name">創意</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">4590.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-neutral-state">⚠️ 偏空｜跌破尋底</span></td>
+    <td class="pressure-cell">4810(平台高) / 4845(前高)</td>
+    <td class="support-cell">4465(前低) / 3273.02(季線大撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line bear">明天仍偏弱｜4810 沒站回前，反彈先當壓力看。</div>
+        <div class="script-line defensive">做空參考：反彈到 4810 不過可偏空；先看 4465。</div>
+        <div class="script-line defensive">防守線先看 4465；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 4.79%｜回檔風險 2.72%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">日K還在偏弱區間，反彈沒站回平台高前，先把壓力看重一點。</div>
+    </td>
+</tr>
+
+<tr data-cats="ASIC">
+    <td class="stock-cell">
+        <span class="stock-id">2454</span>
+        <span class="stock-name">聯發科</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">3210.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-bull-state">💤 偏多｜平台整理</span></td>
+    <td class="pressure-cell">3350(平台高) / 3400(前高)</td>
+    <td class="support-cell">3155(前低) / 3003.5(月線支撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line bull">明天偏強看待｜先等 3350 附近站穩，再考慮做多。</div>
+        <div class="script-line defensive">做多參考：先看 3350；若 30 分鐘 K 收破 3155，就先退。</div>
+        <div class="script-line defensive">防守線先看 3155；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 4.36%｜回檔風險 1.71%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">目前還在平台裡整理，明天只要量能跟上、站穩平台高，才比較有機會往上走。</div>
+    </td>
+</tr>
+
+<tr data-cats="ASIC">
+    <td class="stock-cell">
+        <span class="stock-id">6526</span>
+        <span class="stock-name">達發</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">657.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">663(平台高) / 689(前高)</td>
+    <td class="support-cell">647(前低) / 646(平台低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 0.91%。</div>
+        <div class="script-line defensive">做多參考：先看 663；若 30 分鐘 K 收破 647，就先退。</div>
+        <div class="script-line defensive">防守線先看 646；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 0.91%｜回檔風險 1.52%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="ASIC">
+    <td class="stock-cell">
+        <span class="stock-id">2363</span>
+        <span class="stock-name">矽統</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">59.9</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">61.4(前高) / 61.8(平台高)</td>
+    <td class="support-cell">59.4(平台低) / 57.48(月線支撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 2.5%。</div>
+        <div class="script-line defensive">做多參考：先看 61.4；若 30 分鐘 K 收破 59.4，就先退。</div>
+        <div class="script-line defensive">防守線先看 59.4；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 2.5%｜回檔風險 0.83%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="PCB">
+    <td class="stock-cell">
+        <span class="stock-id">8046</span>
+        <span class="stock-name">南電</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">827.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">841(平台高)</td>
+    <td class="support-cell">793(平台低) / 786(前低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 1.69%。</div>
+        <div class="script-line defensive">做空參考：反彈到 841 不過可偏空；先看 793。</div>
+        <div class="script-line defensive">防守線先看 793；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 1.69%｜回檔風險 4.11%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="PCB">
+    <td class="stock-cell">
+        <span class="stock-id">3189</span>
+        <span class="stock-name">景碩</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">501.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">513(前高) / 514(平台高)</td>
+    <td class="support-cell">486(前低) / 484.5(平台低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 2.4%。</div>
+        <div class="script-line defensive">做多參考：先看 513；若 30 分鐘 K 收破 486，就先退。</div>
+        <div class="script-line defensive">防守線先看 484.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 2.4%｜回檔風險 2.99%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="PCB">
+    <td class="stock-cell">
+        <span class="stock-id">3037</span>
+        <span class="stock-name">欣興</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">823.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">828(平台高)</td>
+    <td class="support-cell">816(前低) / 797(平台低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 0.61%。</div>
+        <div class="script-line defensive">做空參考：反彈到 828 不過可偏空；先看 816。</div>
+        <div class="script-line defensive">防守線先看 797；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 0.61%｜回檔風險 0.85%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="PCB">
+    <td class="stock-cell">
+        <span class="stock-id">2368</span>
+        <span class="stock-name">金像電</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">1240.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-neutral-state">⚠️ 偏空｜跌破尋底</span></td>
+    <td class="pressure-cell">1285(平台高) / 1290(前高)</td>
+    <td class="support-cell">1225(平台低) / 1080.22(季線大撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line bear">明天仍偏弱｜1285 沒站回前，反彈先當壓力看。</div>
+        <div class="script-line defensive">做空參考：反彈到 1285 不過可偏空；先看 1225。</div>
+        <div class="script-line defensive">防守線先看 1225；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 3.63%｜回檔風險 1.21%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">日K還在偏弱區間，反彈沒站回平台高前，先把壓力看重一點。</div>
+    </td>
+</tr>
+
+<tr data-cats="PCB,玻纖布">
+    <td class="stock-cell">
+        <span class="stock-id">6274</span>
+        <span class="stock-name">台燿</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">1205.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-gap-critical">⚡ 跳空過大｜防追高</span></td>
+    <td class="pressure-cell">1300(平台高) / 1305(前高)</td>
+    <td class="support-cell">1200(平台低) / 1196.35(月線支撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line critical">明天如果直接跳空開高 2.86%，先不要追，等 30 分鐘收完再看。</div>
+        <div class="script-line defensive">做多參考：先看 1300；若 30 分鐘 K 收破 1200，就先退。</div>
+        <div class="script-line defensive">防守線先看 1200；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 7.88%｜回檔風險 0.41%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">明早跳空已經把節奏打亂，先不要急著追，等 30 分鐘收盤後再決定方向。</div>
+    </td>
+</tr>
+
+<tr data-cats="PCB">
+    <td class="stock-cell">
+        <span class="stock-id">5469</span>
+        <span class="stock-name">瀚宇博</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">79.2</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">79.4(平台高) / 79.6(前高)</td>
+    <td class="support-cell">78.6(前低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 0.25%。</div>
+        <div class="script-line defensive">做空參考：反彈到 79.4 不過可偏空；先看 78.6。</div>
+        <div class="script-line defensive">防守線先看 78.6；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 0.25%｜回檔風險 0.76%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="PCB">
+    <td class="stock-cell">
+        <span class="stock-id">4958</span>
+        <span class="stock-name">臻鼎-KY</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">438.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">444.5(平台高)</td>
+    <td class="support-cell">408.5(平台低) / 392.7(月線支撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 1.48%。</div>
+        <div class="script-line defensive">做多參考：先看 444.5；若 30 分鐘 K 收破 408.5，就先退。</div>
+        <div class="script-line defensive">防守線先看 408.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 1.48%｜回檔風險 6.74%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="PCB,玻纖布">
+    <td class="stock-cell">
+        <span class="stock-id">8039</span>
+        <span class="stock-name">台虹</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">127.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-neutral-state">⚠️ 偏空｜跌破尋底</span></td>
+    <td class="pressure-cell">133.5(平台高) / 144(前高)</td>
+    <td class="support-cell">127(平台低) / 124.26(季線大撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line bear">明天仍偏弱｜133.5 沒站回前，反彈先當壓力看。</div>
+        <div class="script-line defensive">做空參考：反彈到 133.5 不過可偏空；先看 127。</div>
+        <div class="script-line defensive">防守線先看 127；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 5.12%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">日K還在偏弱區間，反彈沒站回平台高前，先把壓力看重一點。</div>
+    </td>
+</tr>
+
+<tr data-cats="記憶體">
+    <td class="stock-cell">
+        <span class="stock-id">2344</span>
+        <span class="stock-name">華邦電</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">115.5</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">117.5(平台高) / 130.5(前高)</td>
+    <td class="support-cell">113.5(平台低) / 106.29(月線支撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 1.73%。</div>
+        <div class="script-line defensive">做多參考：先看 117.5；若 30 分鐘 K 收破 113.5，就先退。</div>
+        <div class="script-line defensive">防守線先看 113.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 1.73%｜回檔風險 1.73%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="記憶體">
+    <td class="stock-cell">
+        <span class="stock-id">2408</span>
+        <span class="stock-name">南亞科</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">274.5</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">281(平台高) / 311.5(前高)</td>
+    <td class="support-cell">274.5(前低) / 269.5(平台低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 2.37%。</div>
+        <div class="script-line defensive">做多參考：先看 281；若 30 分鐘 K 收破 274.5，就先退。</div>
+        <div class="script-line defensive">防守線先看 269.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 2.37%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="記憶體">
+    <td class="stock-cell">
+        <span class="stock-id">5351</span>
+        <span class="stock-name">鈺創</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">74.4</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">76.8(平台高) / 87.5(前高)</td>
+    <td class="support-cell">73.5(平台低) / 69.38(季線大撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 3.23%。</div>
+        <div class="script-line defensive">做多參考：先看 76.8；若 30 分鐘 K 收破 73.5，就先退。</div>
+        <div class="script-line defensive">防守線先看 73.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 3.23%｜回檔風險 1.21%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="ASIC,記憶體">
+    <td class="stock-cell">
+        <span class="stock-id">8299</span>
+        <span class="stock-name">群聯</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">2260.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-bull-state">💤 偏多｜平台整理</span></td>
+    <td class="pressure-cell">2465(平台高) / 2735(前高)</td>
+    <td class="support-cell">2250(平台低) / 2235.75(月線支撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line bull">明天偏強看待｜先等 2465 附近站穩，再考慮做多。</div>
+        <div class="script-line defensive">做多參考：先看 2465；若 30 分鐘 K 收破 2250，就先退。</div>
+        <div class="script-line defensive">防守線先看 2250；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 9.07%｜回檔風險 0.44%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">目前還在平台裡整理，明天只要量能跟上、站穩平台高，才比較有機會往上走。</div>
+    </td>
+</tr>
+
+<tr data-cats="記憶體">
+    <td class="stock-cell">
+        <span class="stock-id">4967</span>
+        <span class="stock-name">十銓</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">261.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">263(平台高) / 278.5(前高)</td>
+    <td class="support-cell">257.5(前低) / 254(平台低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 0.77%。</div>
+        <div class="script-line defensive">做空參考：反彈到 263 不過可偏空；先看 257.5。</div>
+        <div class="script-line defensive">防守線先看 254；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 0.77%｜回檔風險 1.34%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="記憶體">
+    <td class="stock-cell">
+        <span class="stock-id">3260</span>
+        <span class="stock-name">威剛</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">406.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">409(平台高) / 425(前高)</td>
+    <td class="support-cell">390(前低) / 388.5(平台低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 0.74%。</div>
+        <div class="script-line defensive">做空參考：反彈到 409 不過可偏空；先看 390。</div>
+        <div class="script-line defensive">防守線先看 388.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 0.74%｜回檔風險 3.94%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="記憶體">
+    <td class="stock-cell">
+        <span class="stock-id">2451</span>
+        <span class="stock-name">創見</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">309.5</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">318(平台高) / 336(前高)</td>
+    <td class="support-cell">306.5(前低) / 306(平台低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 2.75%。</div>
+        <div class="script-line defensive">做多參考：先看 318；若 30 分鐘 K 收破 306.5，就先退。</div>
+        <div class="script-line defensive">防守線先看 306；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 2.75%｜回檔風險 0.97%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="光通訊">
+    <td class="stock-cell">
+        <span class="stock-id">4908</span>
+        <span class="stock-name">前鼎</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">243.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">248(平台高)</td>
+    <td class="support-cell">231.5(前低) / 217.65(月線支撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 2.06%。</div>
+        <div class="script-line defensive">做多參考：先看 248；若 30 分鐘 K 收破 231.5，就先退。</div>
+        <div class="script-line defensive">防守線先看 231.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 2.06%｜回檔風險 4.73%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="光通訊">
+    <td class="stock-cell">
+        <span class="stock-id">3081</span>
+        <span class="stock-name">聯亞</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">2590.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-gap-critical">⚡ 結構破壞｜開盤破位</span></td>
+    <td class="pressure-cell">2670(平台高) / 2710(前高)</td>
+    <td class="support-cell">2490(前低) / 2060.43(季線大撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line critical">明天如果一開就跌破平台低，先別硬接，先看有沒有止穩。</div>
+        <div class="script-line defensive">做空參考：反彈到 2670 不過可偏空；先看 2490。</div>
+        <div class="script-line defensive">防守線先看 2490；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 3.09%｜回檔風險 3.86%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">明早跳空已經把節奏打亂，先不要急著追，等 30 分鐘收盤後再決定方向。</div>
+    </td>
+</tr>
+
+<tr data-cats="光通訊">
+    <td class="stock-cell">
+        <span class="stock-id">3363</span>
+        <span class="stock-name">上詮</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">780.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-gap-critical">⚡ 結構破壞｜開盤破位</span></td>
+    <td class="pressure-cell">803(平台高) / 841(前高)</td>
+    <td class="support-cell">775(前低) / 721.57(季線大撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line critical">明天如果一開就跌破平台低，先別硬接，先看有沒有止穩。</div>
+        <div class="script-line defensive">做空參考：反彈到 803 不過可偏空；先看 775。</div>
+        <div class="script-line defensive">防守線先看 775；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 2.95%｜回檔風險 0.64%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">明早跳空已經把節奏打亂，先不要急著追，等 30 分鐘收盤後再決定方向。</div>
+    </td>
+</tr>
+
+<tr data-cats="光通訊">
+    <td class="stock-cell">
+        <span class="stock-id">3450</span>
+        <span class="stock-name">聯鈞</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">413.5</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">415(平台高)</td>
+    <td class="support-cell">392.5(前低) / 369.68(月線支撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 0.36%。</div>
+        <div class="script-line defensive">做多參考：先看 415；若 30 分鐘 K 收破 392.5，就先退。</div>
+        <div class="script-line defensive">防守線先看 392.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 0.36%｜回檔風險 5.08%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="光通訊">
+    <td class="stock-cell">
+        <span class="stock-id">3163</span>
+        <span class="stock-name">波若威</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">949.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">950(前高) / 969(平台高)</td>
+    <td class="support-cell">900(前低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 0.11%。</div>
+        <div class="script-line defensive">做空參考：反彈到 950 不過可偏空；先看 900。</div>
+        <div class="script-line defensive">防守線先看 900；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 0.11%｜回檔風險 5.16%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="機器人">
+    <td class="stock-cell">
+        <span class="stock-id">2049</span>
+        <span class="stock-name">上銀</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">357.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-bull-state">💤 偏多｜平台整理</span></td>
+    <td class="pressure-cell">376(平台高) / 392.5(前高)</td>
+    <td class="support-cell">356.5(平台低) / 331.15(月線支撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line bull">明天偏強看待｜先等 376 附近站穩，再考慮做多。</div>
+        <div class="script-line defensive">做多參考：先看 376；若 30 分鐘 K 收破 356.5，就先退。</div>
+        <div class="script-line defensive">防守線先看 356.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 5.32%｜回檔風險 0.14%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">目前還在平台裡整理，明天只要量能跟上、站穩平台高，才比較有機會往上走。</div>
+    </td>
+</tr>
+
+<tr data-cats="機器人">
+    <td class="stock-cell">
+        <span class="stock-id">1536</span>
+        <span class="stock-name">和大</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">49.05</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">50(平台高) / 51.4(前高)</td>
+    <td class="support-cell">48.65(平台低) / 48.15(前低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 1.94%。</div>
+        <div class="script-line defensive">做空參考：反彈到 50 不過可偏空；先看 48.65。</div>
+        <div class="script-line defensive">防守線先看 48.65；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 1.94%｜回檔風險 0.82%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+<tr data-cats="機器人">
+    <td class="stock-cell">
+        <span class="stock-id">1597</span>
+        <span class="stock-name">直得</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">170.5</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-bull-state">💤 偏多｜平台整理</span></td>
+    <td class="pressure-cell">180(平台高) / 189.5(前高)</td>
+    <td class="support-cell">170.5(平台低) / 155(月線支撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line bull">明天偏強看待｜先等 180 附近站穩，再考慮做多。</div>
+        <div class="script-line defensive">做多參考：先看 180；若 30 分鐘 K 收破 170.5，就先退。</div>
+        <div class="script-line defensive">防守線先看 170.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 5.57%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">目前還在平台裡整理，明天只要量能跟上、站穩平台高，才比較有機會往上走。</div>
+    </td>
+</tr>
+
+<tr data-cats="機器人">
+    <td class="stock-cell">
+        <span class="stock-id">4562</span>
+        <span class="stock-name">穎漢</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">40.2</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-bull-state">💤 偏多｜平台整理</span></td>
+    <td class="pressure-cell">41.8(平台高) / 42.95(前高)</td>
+    <td class="support-cell">39.9(平台低) / 39.05(前低)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line bull">明天偏強看待｜先等 41.8 附近站穩，再考慮做多。</div>
+        <div class="script-line defensive">做多參考：先看 41.8；若 30 分鐘 K 收破 39.9，就先退。</div>
+        <div class="script-line defensive">防守線先看 39.9；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 3.98%｜回檔風險 0.75%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">目前還在平台裡整理，明天只要量能跟上、站穩平台高，才比較有機會往上走。</div>
+    </td>
+</tr>
+
+<tr data-cats="機器人">
+    <td class="stock-cell">
+        <span class="stock-id">4571</span>
+        <span class="stock-name">鈞興-KY</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">210.5</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-bull-state">💤 偏多｜平台整理</span></td>
+    <td class="pressure-cell">227.5(平台高) / 232(前高)</td>
+    <td class="support-cell">206.5(平台低) / 189.4(月線支撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line bull">明天偏強看待｜先等 227.5 附近站穩，再考慮做多。</div>
+        <div class="script-line defensive">做多參考：先看 227.5；若 30 分鐘 K 收破 206.5，就先退。</div>
+        <div class="script-line defensive">防守線先看 206.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 8.08%｜回檔風險 1.9%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">目前還在平台裡整理，明天只要量能跟上、站穩平台高，才比較有機會往上走。</div>
+    </td>
+</tr>
+
+<tr data-cats="玻纖布">
+    <td class="stock-cell">
+        <span class="stock-id">2383</span>
+        <span class="stock-name">台光電</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">4380.0</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-neutral-state">⚠️ 偏空｜跌破尋底</span></td>
+    <td class="pressure-cell">4535(平台高) / 4615(前高)</td>
+    <td class="support-cell">4360(平台低) / 3434.48(季線大撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line bear">明天仍偏弱｜4535 沒站回前，反彈先當壓力看。</div>
+        <div class="script-line defensive">做空參考：反彈到 4535 不過可偏空；先看 4360。</div>
+        <div class="script-line defensive">防守線先看 4360；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 3.54%｜回檔風險 0.46%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">日K還在偏弱區間，反彈沒站回平台高前，先把壓力看重一點。</div>
+    </td>
+</tr>
+
+<tr data-cats="玻纖布">
+    <td class="stock-cell">
+        <span class="stock-id">6213</span>
+        <span class="stock-name">聯茂</span>
+    </td>
+    <td class="price-cell">
+        <span class="price-val">235.5</span>
+        <span class="completed-tag">已收盤K</span>
+    </td>
+    <td><span class="status-badge status-space-short">⚠️ 空間不足｜避開</span></td>
+    <td class="pressure-cell">240.5(平台高) / 253(前高)</td>
+    <td class="support-cell">231(平台低) / 201.43(季線大撐)</td>
+    <td class="script-cell">
+        
+    <div class="decision-container">
+        <div class="script-line warning">上方空間不大，先別追價，離目標只剩 2.12%。</div>
+        <div class="script-line defensive">做空參考：反彈到 240.5 不過可偏空；先看 231。</div>
+        <div class="script-line defensive">防守線先看 231；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class="badge-row">
+            <span class="script-badge status-rr">上方空間 2.12%｜回檔風險 1.91%</span>
+            <span class="script-badge status-gap-info">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class="story-text">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>
+    </td>
+</tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const buttons = document.querySelectorAll(".btn");
+    const rows = document.querySelectorAll("tbody tr");
+
+    buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            buttons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+
+            const cat = btn.dataset.cat;
+            rows.forEach(row => {
+                const cats = row.dataset.cats || "";
+                if (cat === "全部") {
+                    row.style.display = "";
+                } else {
+                    row.style.display = cats.includes(cat) ? "" : "none";
+                }
+            });
+        });
+    });
+});
+</script>
+</body>
+</html>
