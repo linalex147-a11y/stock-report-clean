@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI多週期盤後結構報表</title>
+<style>
+  :root {--bg:#f5f7fb;--panel:#ffffff;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--green:#0f766e;--green-soft:#ecfdf5;--red:#dc2626;--red-soft:#fef2f2;--blue:#2563eb;--blue-soft:#eff6ff;--gray-soft:#f3f4f6;--dark:#172033;}
+  * {box-sizing:border-box;}
+  body {margin:0;padding:20px;background:var(--bg);color:var(--text);font-family:"Segoe UI","Microsoft JhengHei",Arial,sans-serif;}
+  .container {max-width:1480px;margin:auto;}
+  .topbar {display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;}
+  .brand h1 {margin:0 0 8px;font-size:28px;line-height:1.2;}
+  .sub {color:var(--muted);margin:0;font-size:13px;}
+  .update-card,.dash-card,.section {background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 24px rgba(15,23,42,.07);}
+  .update-card {padding:12px 16px;min-width:280px;}
+  .update-title {font-weight:900;color:var(--dark);} .update-sub,.dash-s {color:var(--muted);font-size:12px;margin-top:3px;}
+  .dash-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:12px 0 18px;}
+  .dash-card {padding:14px 16px;} .dash-k {color:var(--muted);font-size:12px;font-weight:900;} .dash-v {font-size:20px;font-weight:900;margin-top:6px;}
+  .toolbar {display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0;}
+  .btn {padding:10px 16px;border:0;border-radius:999px;cursor:pointer;background:#e5e7eb;font-size:14px;font-weight:800;color:#1f2937;}
+  .btn.active {background:var(--blue);color:#fff;}
+  .search {margin-left:auto;min-width:260px;padding:10px 14px;border-radius:14px;border:1px solid #d7dee8;font-size:14px;}
+  .section {overflow:hidden;margin-bottom:18px;}
+  .section-head {padding:14px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#fff,#f8fafc);}
+  .section-title {font-weight:900;font-size:18px;color:var(--dark);} .section-sub {color:var(--muted);font-size:12px;margin-top:4px;}
+  .sector-wrap {overflow-x:auto;padding:14px;} table {border-collapse:collapse;width:100%;min-width:760px;} th {background:#0f172a;color:#fff;padding:12px;text-align:left;} td {border-bottom:1px solid var(--border);padding:12px;}
+  .sector-badge {display:inline-flex;padding:6px 10px;border-radius:999px;font-weight:800;font-size:12px;}
+  .sector-hot {background:#dcfce7;color:#166534;} .sector-warm {background:#fff7ed;color:#9a3412;} .sector-neutral {background:#eff6ff;color:#1d4ed8;} .sector-cool {background:#f3f4f6;color:#4b5563;}
+  .card-grid-wrap {display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:14px;padding:16px;}
+  .stock-card {border:1px solid var(--border);border-radius:16px;padding:14px;background:#fff;display:grid;gap:12px;border-left:6px solid #94a3b8;}
+  .stock-card.tone-long {border-left-color:var(--green);} .stock-card.tone-risk {border-left-color:var(--red);} .stock-card.tone-watch {border-left-color:var(--blue);}
+  .card-head {display:flex;justify-content:space-between;gap:12px;align-items:flex-start;}
+  .card-head h2 {margin:0;font-size:20px;line-height:1.2;} .sector {color:var(--muted);font-size:13px;margin-top:4px;font-weight:700;}
+  .score-box {min-width:78px;text-align:center;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:8px;}
+  .score-box span {display:block;color:var(--muted);font-size:11px;font-weight:900;} .score-box strong {display:block;font-size:24px;line-height:1.1;color:var(--dark);}
+  .status-row {display:flex;flex-wrap:wrap;gap:8px;} .pill {display:inline-flex;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:900;background:var(--green-soft);color:var(--green);} .tone-risk .pill {background:var(--red-soft);color:var(--red);} .tone-watch .pill {background:var(--blue-soft);color:var(--blue);} .pill.soft {background:var(--gray-soft);color:#374151;}
+  .card-grid {display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .field {background:#f8fafc;border:1px solid #edf2f7;border-radius:10px;padding:9px 10px;min-width:0;}
+  .field span {display:block;color:var(--muted);font-size:11px;font-weight:900;margin-bottom:4px;} .field strong {display:block;font-size:13px;overflow-wrap:anywhere;line-height:1.45;}
+  .script-box {border-top:1px solid var(--border);padding-top:10px;} .script-title {font-weight:900;margin-bottom:6px;color:var(--dark);} .script-box p {margin:0;line-height:1.65;font-size:14px;}
+  .empty {padding:18px;color:var(--muted);text-align:center;}
+  @media (max-width:900px) {body {padding:12px;} .dash-grid {grid-template-columns:1fr 1fr;} .search {margin-left:0;min-width:100%;} .card-grid-wrap {grid-template-columns:1fr;padding:12px;} .brand h1 {font-size:23px;}}
+  @media (max-width:560px) {.dash-grid {grid-template-columns:1fr;} .card-grid {grid-template-columns:1fr;} .card-head {align-items:stretch;} .score-box {min-width:72px;} body {padding:8px;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="topbar"><div class="brand"><h1>📊 AI多週期盤後結構報表</h1><p class="sub">手機友善 card 版，保留分類、族群、AI分數、支撐壓力與劇本判讀</p></div><div class="update-card"><div class="update-title">更新時間：2026-05-25 22:37</div><div class="update-sub">每日盤後自動執行同步</div></div></div>
+  <div class="dash-grid">
+      <div class="dash-card"><div class="dash-k">市場情緒</div><div class="dash-v">🌤 中性偏多</div><div class="dash-s">平均分數 70.3｜強勢比 46%</div></div>
+      <div class="dash-card"><div class="dash-k">最強族群</div><div class="dash-v">MCU</div><div class="dash-s">攻擊盤 32｜風險 10</div></div>
+      <div class="dash-card"><div class="dash-k">最強股票</div><div class="dash-v">6494 九齊</div><div class="dash-s">總檔數 74</div></div>
+      <div class="dash-card"><div class="dash-k">整體平均</div><div class="dash-v">70.3</div><div class="dash-s">族群 11 個</div></div>
+    </div>
+  <div class="section"><div class="section-head"><div class="section-title">族群強弱總表</div><div class="section-sub">依各族群成員的 AI 分數平均計算</div></div><div class="sector-wrap"><table><thead><tr><th>族群</th><th>平均分數</th><th>狀態</th><th>代表股</th><th>成員數</th></tr></thead><tbody><tr><td>MCU</td><td><strong>88.3</strong></td><td><span class="sector-badge sector-hot">主流</span></td><td>6494 九齊</td><td>7</td></tr>
+<tr><td>自選</td><td><strong>82.6</strong></td><td><span class="sector-badge sector-hot">主流</span></td><td>1513 中興電</td><td>10</td></tr>
+<tr><td>機器人</td><td><strong>82.6</strong></td><td><span class="sector-badge sector-hot">主流</span></td><td>4562 穎漢</td><td>7</td></tr>
+<tr><td>記憶體</td><td><strong>81.5</strong></td><td><span class="sector-badge sector-hot">主流</span></td><td>2451 創見</td><td>8</td></tr>
+<tr><td>玻纖布</td><td><strong>71.0</strong></td><td><span class="sector-badge sector-warm">偏強</span></td><td>8039 台虹</td><td>4</td></tr>
+<tr><td>AI伺服器</td><td><strong>68.9</strong></td><td><span class="sector-badge sector-warm">偏強</span></td><td>2421 建準</td><td>10</td></tr>
+<tr><td>BBU</td><td><strong>64.7</strong></td><td><span class="sector-badge sector-neutral">整理</span></td><td>5309 系統電</td><td>7</td></tr>
+<tr><td>光通訊</td><td><strong>64.3</strong></td><td><span class="sector-badge sector-neutral">整理</span></td><td>3363 上詮</td><td>6</td></tr>
+<tr><td>PCB</td><td><strong>60.7</strong></td><td><span class="sector-badge sector-neutral">整理</span></td><td>8039 台虹</td><td>9</td></tr>
+<tr><td>ASIC</td><td><strong>58.0</strong></td><td><span class="sector-badge sector-neutral">整理</span></td><td>3443 創意</td><td>7</td></tr>
+<tr><td>封測</td><td><strong>55.4</strong></td><td><span class="sector-badge sector-neutral">整理</span></td><td>3265 台星科</td><td>9</td></tr></tbody></table></div></div>
+  <div class="toolbar"><button class="btn active" data-cat="全部">全部</button>
+<button class="btn" data-cat="自選">自選</button>
+<button class="btn" data-cat="AI伺服器">AI伺服器</button>
+<button class="btn" data-cat="ASIC">ASIC</button>
+<button class="btn" data-cat="封測">封測</button>
+<button class="btn" data-cat="PCB">PCB</button>
+<button class="btn" data-cat="記憶體">記憶體</button>
+<button class="btn" data-cat="光通訊">光通訊</button>
+<button class="btn" data-cat="機器人">機器人</button>
+<button class="btn" data-cat="玻纖布">玻纖布</button>
+<button class="btn" data-cat="MCU">MCU</button>
+<button class="btn" data-cat="BBU">BBU</button>
+<input id="searchBox" class="search" type="text" placeholder="搜尋股票、族群、狀態、劇本..."></div>
+  <div class="section"><div class="section-head"><div class="section-title">個股 AI 盤後卡片</div><div class="section-sub">一檔股票一張 card，手機一列一張；排序：AI分數、RR、結構排序</div></div><div class="card-grid-wrap">
+        <article class="stock-card tone-risk" data-cats="MCU">
+          <header class="card-head">
+            <div>
+              <h2>6494 九齊</h2>
+              <div class="sector">MCU</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>100</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">多方回檔｜看關鍵位</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>57.2</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>支撐</span><strong>57.1(30M平台) / 56.1(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>58(前高) / 58.2(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>8.00</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 4.36x｜橫向整理</strong></div>
+            <div class="field"><span>市場狀態</span><strong>洗盤</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：觀察整理<br>關鍵：守住 57.1(30M平台) / 56.1(前低)，突破 58(前高) / 58.2(30M平台)，RR 佳<br>劇本：先看支撐是否守穩；重新站回壓力才提高攻擊假設。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="記憶體">
+          <header class="card-head">
+            <div>
+              <h2>2451 創見</h2>
+              <div class="sector">記憶體</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>100</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">多方回檔｜看關鍵位</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>311</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>空｜強空</strong></div>
+            <div class="field"><span>支撐</span><strong>310(30M平台) / 304.88(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>316.5(30M平台) / 316.5(前高)</strong></div>
+            <div class="field"><span>RR</span><strong>5.50</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 3.53x｜沿短均線下殺</strong></div>
+            <div class="field"><span>市場狀態</span><strong>洗盤</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：觀察整理<br>關鍵：守住 310(30M平台) / 304.88(MA20)，突破 316.5(30M平台) / 316.5(前高)，RR 佳<br>劇本：先看支撐是否守穩；重新站回壓力才提高攻擊假設。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="PCB,玻纖布">
+          <header class="card-head">
+            <div>
+              <h2>8039 台虹</h2>
+              <div class="sector">PCB,玻纖布</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>100</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🔥 攻擊盤</span><span class="pill soft">主升多｜等突破</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>149.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>支撐</span><strong>149(30M平台) / 139(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>151(前高) / 151.5(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>3.00</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.25x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>初升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 149(30M平台) / 139(前低)，突破 151(前高) / 151.5(30M平台)，RR 佳<br>劇本：條件偏完整，可偏順勢；若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="MCU">
+          <header class="card-head">
+            <div>
+              <h2>2458 義隆</h2>
+              <div class="sector">MCU</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>100</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🔥 攻擊盤</span><span class="pill soft">多方壓縮｜等方向</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>163.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>支撐</span><strong>162(30M平台) / 158.5(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>167.5(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>2.67</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.85x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 162(30M平台) / 158.5(前低)，突破 167.5(30M平台)，RR 佳<br>劇本：條件偏完整，可偏順勢；若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="機器人">
+          <header class="card-head">
+            <div>
+              <h2>4562 穎漢</h2>
+              <div class="sector">機器人</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>100</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🔥 攻擊盤</span><span class="pill soft">多方壓縮｜等方向</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>42.25</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>42(30M平台) / 40.8(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>42.8(前高) / 42.8(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>2.20</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 3.01x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 42(30M平台) / 40.8(前低)，突破 42.8(前高) / 42.8(30M平台)，RR 佳<br>劇本：條件偏完整，可偏順勢；若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="MCU">
+          <header class="card-head">
+            <div>
+              <h2>6202 盛群</h2>
+              <div class="sector">MCU</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>100</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🔥 攻擊盤</span><span class="pill soft">多方壓縮｜等方向</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>61.1</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>60.7(30M平台) / 58.9(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>61.9(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>2.00</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.12x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 60.7(30M平台) / 58.9(前低)，突破 61.9(30M平台)，RR 佳<br>劇本：條件偏完整，可偏順勢；若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="光通訊">
+          <header class="card-head">
+            <div>
+              <h2>3363 上詮</h2>
+              <div class="sector">光通訊</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>100</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🔥 攻擊盤</span><span class="pill soft">多方壓縮｜等方向</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>846</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>支撐</span><strong>842(30M平台) / 819.9(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>852(前高) / 863(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>1.50</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.70x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 842(30M平台) / 819.9(MA20)，突破 852(前高) / 863(30M平台)<br>劇本：條件偏完整，可偏順勢；若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="自選">
+          <header class="card-head">
+            <div>
+              <h2>1513 中興電</h2>
+              <div class="sector">自選</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>100</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🔥 攻擊盤</span><span class="pill soft">多方壓縮｜等方向</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>160</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>156.5(30M平台) / 154.5(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>164.8(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>1.37</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.82x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 156.5(30M平台) / 154.5(前低)，突破 164.8(保守壓力)<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="自選,機器人">
+          <header class="card-head">
+            <div>
+              <h2>2359 所羅門</h2>
+              <div class="sector">自選,機器人</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>100</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">多方壓縮｜等方向</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>141.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>140.5(30M平台) / 134(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>142.5(大量K) / 142.5(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>1.00</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.79x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 140.5(30M平台) / 134(前低)，突破 142.5(大量K) / 142.5(30M平台)<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>2421 建準</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>100</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">多方壓縮｜等方向</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>162.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>161.5(大量K) / 158.5(30M平台)</strong></div>
+            <div class="field"><span>壓力</span><strong>163.5(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>1.00</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 3.15x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 161.5(大量K) / 158.5(30M平台)，突破 163.5(30M平台)<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>3265 台星科</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>100</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">多方壓縮｜等方向</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>189.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>186(30M平台) / 178.57(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>193(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>1.00</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.86x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 186(30M平台) / 178.57(MA20)，突破 193(30M平台)<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="MCU">
+          <header class="card-head">
+            <div>
+              <h2>5471 松翰</h2>
+              <div class="sector">MCU</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>98</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">多方回檔｜看關鍵位</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>53</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>支撐</span><strong>52.5(前低) / 47.68(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>54(前高) / 54(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>2.00</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.92x｜橫向整理</strong></div>
+            <div class="field"><span>市場狀態</span><strong>洗盤</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：觀察整理<br>關鍵：守住 52.5(前低) / 47.68(MA20)，突破 54(前高) / 54(30M平台)，RR 佳<br>劇本：先看支撐是否守穩；重新站回壓力才提高攻擊假設。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="MCU">
+          <header class="card-head">
+            <div>
+              <h2>4952 凌通</h2>
+              <div class="sector">MCU</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>97</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🔥 攻擊盤</span><span class="pill soft">多方壓縮｜等方向</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>54.7</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>53.5(30M平台) / 52.5(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>56.34(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>1.37</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.53x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 53.5(30M平台) / 52.5(前低)，突破 56.34(保守壓力)<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="記憶體">
+          <header class="card-head">
+            <div>
+              <h2>2408 南亞科</h2>
+              <div class="sector">記憶體</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>95</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">多方回檔｜看關鍵位</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>296</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>空｜偏空</strong></div>
+            <div class="field"><span>支撐</span><strong>294.5(30M平台) / 293(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>310.5(前高) / 310.5(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>9.67</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.65x｜沿短均線下殺</strong></div>
+            <div class="field"><span>市場狀態</span><strong>洗盤</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：觀察整理<br>關鍵：守住 294.5(30M平台) / 293(前低)，突破 310.5(前高) / 310.5(30M平台)，RR 佳<br>劇本：先看支撐是否守穩；重新站回壓力才提高攻擊假設。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="記憶體">
+          <header class="card-head">
+            <div>
+              <h2>4967 十銓</h2>
+              <div class="sector">記憶體</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>95</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">空方反彈｜看關鍵位</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>271.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>268.5(30M平台) / 266.5(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>272(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>6.00</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.29x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>反彈</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：觀察整理<br>關鍵：守住 268.5(30M平台) / 266.5(前低)，突破 272(30M平台)，RR 佳<br>劇本：先看支撐是否守穩；重新站回壓力才提高攻擊假設。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="機器人">
+          <header class="card-head">
+            <div>
+              <h2>4571 鈞興-KY</h2>
+              <div class="sector">機器人</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>94</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🟠 偏熱盤</span><span class="pill soft">末升段｜等突破</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>227</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>支撐</span><strong>226.5(30M平台) / 216(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>229.5(前高) / 231(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>5.00</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 3.77x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 226.5(30M平台) / 216(前低)，突破 229.5(前高) / 231(30M平台)，RR 佳<br>劇本：若量能無法延續，不追高；失守支撐先控風險。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="BBU">
+          <header class="card-head">
+            <div>
+              <h2>5309 系統電</h2>
+              <div class="sector">BBU</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>90</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">多方壓縮｜等方向</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>69.9</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>69.3(30M平台) / 67.5(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>70.4(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.83</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.62x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 69.3(30M平台) / 67.5(前低)，突破 70.4(30M平台)，RR 偏緊<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="機器人">
+          <header class="card-head">
+            <div>
+              <h2>1536 和大</h2>
+              <div class="sector">機器人</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>88</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">主升多｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>52.3</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>52.11(MA20) / 51.2(30M平台)</strong></div>
+            <div class="field"><span>壓力</span><strong>52.4(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.53</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.64x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>初升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 52.11(MA20) / 51.2(30M平台)，突破 52.4(30M平台)，RR 偏緊<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="自選,記憶體">
+          <header class="card-head">
+            <div>
+              <h2>2337 旺宏</h2>
+              <div class="sector">自選,記憶體</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>86</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">空方反彈｜看關鍵位</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>152.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>149(30M平台) / 141(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>153.5(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>3.50</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.66x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>反彈</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：觀察整理<br>關鍵：守住 149(30M平台) / 141(前低)，突破 153.5(30M平台)，RR 佳<br>劇本：先看支撐是否守穩；重新站回壓力才提高攻擊假設。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>6669 緯穎</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>86</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🟠 偏熱盤</span><span class="pill soft">末升段｜等突破</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>5610</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>支撐</span><strong>5520(30M平台) / 5345(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>5855(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>2.72</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 3.01x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 5520(30M平台) / 5345(前低)，突破 5855(30M平台)，RR 佳<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="自選">
+          <header class="card-head">
+            <div>
+              <h2>3264 欣銓</h2>
+              <div class="sector">自選</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>86</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">多方回檔｜看關鍵位</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>224</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>支撐</span><strong>221.5(30M平台) / 219.5(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>230.5(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>2.60</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.08x｜橫向整理</strong></div>
+            <div class="field"><span>市場狀態</span><strong>洗盤</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：觀察整理<br>關鍵：守住 221.5(30M平台) / 219.5(MA20)，突破 230.5(30M平台)，RR 佳<br>劇本：先看支撐是否守穩；重新站回壓力才提高攻擊假設。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>2449 京元電子</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>86</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">主升多｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>317</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>303.98(MA20) / 296(30M平台)</strong></div>
+            <div class="field"><span>壓力</span><strong>326.51(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.73</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 4.01x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>初升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 303.98(MA20) / 296(30M平台)，突破 326.51(保守壓力)，RR 偏緊<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="記憶體">
+          <header class="card-head">
+            <div>
+              <h2>5351 鈺創</h2>
+              <div class="sector">記憶體</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>86</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">主升多｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>82.1</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>80.3(30M平台) / 77.83(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>83(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.50</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.90x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>初升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 80.3(30M平台) / 77.83(MA20)，突破 83(30M平台)，RR 偏緊<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="BBU">
+          <header class="card-head">
+            <div>
+              <h2>6781 AES-KY</h2>
+              <div class="sector">BBU</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>86</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">主升多｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>1260</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>1210(30M平台) / 1182.25(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>1285(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.50</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 3.19x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>初升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 1210(30M平台) / 1182.25(MA20)，突破 1285(30M平台)，RR 偏緊<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="自選,PCB">
+          <header class="card-head">
+            <div>
+              <h2>2367 燿華</h2>
+              <div class="sector">自選,PCB</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>86</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">主升多｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>70.1</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>66.8(30M平台) / 64.1(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>71.2(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.33</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.61x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>初升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 66.8(30M平台) / 64.1(前低)，突破 71.2(30M平台)，RR 偏緊<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="自選">
+          <header class="card-head">
+            <div>
+              <h2>8054 安國</h2>
+              <div class="sector">自選</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>86</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">主升多｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>116</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>111(30M平台) / 109.5(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>117.5(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.30</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 4.32x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>初升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 111(30M平台) / 109.5(前低)，突破 117.5(30M平台)，RR 偏緊<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="MCU">
+          <header class="card-head">
+            <div>
+              <h2>2401 凌陽</h2>
+              <div class="sector">MCU</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>83</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">多方回檔｜看關鍵位</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>29.45</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>空｜偏空</strong></div>
+            <div class="field"><span>支撐</span><strong>29.35(30M平台) / 25.63(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>30.75(前高) / 30.75(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>13.00</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.63x｜沿短均線下殺</strong></div>
+            <div class="field"><span>市場狀態</span><strong>洗盤</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：觀察整理<br>關鍵：守住 29.35(30M平台) / 25.63(MA20)，突破 30.75(前高) / 30.75(30M平台)，RR 佳<br>劇本：先看支撐是否守穩；重新站回壓力才提高攻擊假設。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="自選,機器人">
+          <header class="card-head">
+            <div>
+              <h2>5443 均豪</h2>
+              <div class="sector">自選,機器人</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>83</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">主升多｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>132</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>127(大量K) / 124.5(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>135.96(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.79</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.61x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>初升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 127(大量K) / 124.5(MA20)，突破 135.96(保守壓力)，RR 偏緊<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="自選">
+          <header class="card-head">
+            <div>
+              <h2>6919 康霈</h2>
+              <div class="sector">自選</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>83</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">主升多｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>108</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>103.5(30M平台) / 101.5(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>110.3(MA60)</strong></div>
+            <div class="field"><span>RR</span><strong>0.51</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.60x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>初升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 103.5(30M平台) / 101.5(前低)，突破 110.3(MA60)，RR 偏緊<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>3706 神達</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>82</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">多方壓縮｜等方向</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>88.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>87.8(30M平台) / 83.56(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>88.8(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.43</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.59x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 87.8(30M平台) / 83.56(MA20)，突破 88.8(30M平台)，RR 偏緊<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>3231 緯創</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>82</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">多方壓縮｜等方向</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>149</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>144.5(30M平台) / 140.53(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>150(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.22</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 3.64x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 144.5(30M平台) / 140.53(MA20)，突破 150(30M平台)，RR 偏緊<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="ASIC">
+          <header class="card-head">
+            <div>
+              <h2>3443 創意</h2>
+              <div class="sector">ASIC</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>80</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜等突破</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>5310</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>5120(30M平台) / 5065(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>5510(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>1.05</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.23x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 5120(30M平台) / 5065(前低)，突破 5510(30M平台)<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="玻纖布">
+          <header class="card-head">
+            <div>
+              <h2>6213 聯茂</h2>
+              <div class="sector">玻纖布</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>75</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">空方反彈｜看關鍵位</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>267</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>262(30M平台) / 246.5(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>271.5(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>1.11</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.40x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>反彈</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：觀察整理<br>關鍵：守住 262(30M平台) / 246.5(前低)，突破 271.5(30M平台)<br>劇本：先看支撐是否守穩；重新站回壓力才提高攻擊假設。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="記憶體">
+          <header class="card-head">
+            <div>
+              <h2>3260 威剛</h2>
+              <div class="sector">記憶體</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>71</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌫 等待盤</span><span class="pill soft">空方壓縮｜等方向</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>407.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>空｜強空</strong></div>
+            <div class="field"><span>支撐</span><strong>395.27(保守支撐)</strong></div>
+            <div class="field"><span>壓力</span><strong>417.5(前高) / 418.5(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>1.22</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.08x｜沿短均線下殺</strong></div>
+            <div class="field"><span>市場狀態</span><strong>空方壓縮</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：盤整待變<br>關鍵：守住 395.27(保守支撐)，突破 417.5(前高) / 418.5(30M平台)<br>劇本：等待壓力或支撐其中一邊被確認，再決定追蹤方向。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="ASIC">
+          <header class="card-head">
+            <div>
+              <h2>3035 智原</h2>
+              <div class="sector">ASIC</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>68</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜等突破</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>218.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>211(30M平台) / 208(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>225.5(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.93</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.95x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 211(30M平台) / 208(前低)，突破 225.5(30M平台)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-long" data-cats="PCB">
+          <header class="card-head">
+            <div>
+              <h2>4958 臻鼎-KY</h2>
+              <div class="sector">PCB</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>68</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜等突破</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>529</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>516(30M平台) / 469.5(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>541(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.92</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.99x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 516(30M平台) / 469.5(前低)，突破 541(30M平台)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="PCB">
+          <header class="card-head">
+            <div>
+              <h2>5469 瀚宇博</h2>
+              <div class="sector">PCB</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>65</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">空方反彈｜看關鍵位</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>83.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>支撐</span><strong>83.08(MA20) / 82.8(30M平台)</strong></div>
+            <div class="field"><span>壓力</span><strong>84.1(30M平台) / 86.23(MA60)</strong></div>
+            <div class="field"><span>RR</span><strong>0.70</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.88x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>反彈</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：觀察整理<br>關鍵：守住 83.08(MA20) / 82.8(30M平台)，突破 84.1(30M平台) / 86.23(MA60)，RR 偏緊<br>劇本：先看支撐是否守穩；重新站回壓力才提高攻擊假設。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>2382 廣達</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>65</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">空方反彈｜看關鍵位</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>316.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>316(30M平台) / 308(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>323(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.08</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 5.93x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>反彈</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：觀察整理<br>關鍵：守住 316(30M平台) / 308(前低)，突破 323(30M平台)，RR 偏緊<br>劇本：先看支撐是否守穩；重新站回壓力才提高攻擊假設。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="BBU">
+          <header class="card-head">
+            <div>
+              <h2>3211 順達</h2>
+              <div class="sector">BBU</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>62</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌫 等待盤</span><span class="pill soft">主升多｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>426.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>388(30M平台) / 375.82(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>439.3(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.33</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.16x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：多方續強<br>關鍵：守住 388(30M平台) / 375.82(MA20)，突破 439.3(保守壓力)，RR 偏緊<br>劇本：若帶量站上壓力，續攻機率提高；跌破支撐則轉觀察。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="光通訊">
+          <header class="card-head">
+            <div>
+              <h2>3163 波若威</h2>
+              <div class="sector">光通訊</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>61</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>1210</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>1145(30M平台) / 1063.35(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>1240(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.46</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.41x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 1145(30M平台) / 1063.35(MA20)，突破 1240(30M平台)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="ASIC,記憶體">
+          <header class="card-head">
+            <div>
+              <h2>8299 群聯</h2>
+              <div class="sector">ASIC,記憶體</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>61</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>2480</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>2425(30M平台) / 2365(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>2505(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.45</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.68x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 2425(30M平台) / 2365(MA20)，突破 2505(30M平台)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="PCB">
+          <header class="card-head">
+            <div>
+              <h2>3037 欣興</h2>
+              <div class="sector">PCB</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>61</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>990</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>969(30M平台) / 905(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>999(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.43</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.45x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 969(30M平台) / 905(前低)，突破 999(30M平台)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="自選,光通訊">
+          <header class="card-head">
+            <div>
+              <h2>4979 華星光</h2>
+              <div class="sector">自選,光通訊</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>60</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>655</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>629(30M平台) / 614.55(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>674.65(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.76</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 4.16x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 629(30M平台) / 614.55(MA20)，突破 674.65(保守壓力)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="機器人">
+          <header class="card-head">
+            <div>
+              <h2>2049 上銀</h2>
+              <div class="sector">機器人</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>60</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>395</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>375.5(30M平台) / 373.5(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>398.5(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.18</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.53x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 375.5(30M平台) / 373.5(前低)，突破 398.5(30M平台)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>3017 奇鋐</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>59</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">空方反彈｜看關鍵位</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>2575</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>2540(30M平台) / 2495(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>2630(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.64</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.23x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>反彈</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：觀察整理<br>關鍵：守住 2540(30M平台) / 2495(前低)，突破 2630(30M平台)，RR 偏緊<br>劇本：先看支撐是否守穩；重新站回壓力才提高攻擊假設。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="記憶體">
+          <header class="card-head">
+            <div>
+              <h2>2344 華邦電</h2>
+              <div class="sector">記憶體</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>58</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>128.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>121.5(30M平台) / 114(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>129.5(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.14</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.76x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 121.5(30M平台) / 114(前低)，突破 129.5(30M平台)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>2376 技嘉</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>56</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>336.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>322.5(30M平台) / 316.5(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>346.6(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.72</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.90x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 322.5(30M平台) / 316.5(前低)，突破 346.6(保守壓力)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="PCB">
+          <header class="card-head">
+            <div>
+              <h2>2368 金像電</h2>
+              <div class="sector">PCB</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>56</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>1425</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>1368.75(MA20) / 1330(30M平台)</strong></div>
+            <div class="field"><span>壓力</span><strong>1450(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.44</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 3.02x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 1368.75(MA20) / 1330(30M平台)，突破 1450(30M平台)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="ASIC">
+          <header class="card-head">
+            <div>
+              <h2>6526 達發</h2>
+              <div class="sector">ASIC</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>56</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>750</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>720(30M平台) / 704(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>761(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.37</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 3.60x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 720(30M平台) / 704(前低)，突破 761(30M平台)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="AI伺服器,BBU">
+          <header class="card-head">
+            <div>
+              <h2>2301 光寶科</h2>
+              <div class="sector">AI伺服器,BBU</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>56</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>227.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>207(30M平台) / 204.5(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>234.33(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.33</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.36x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 207(30M平台) / 204.5(前低)，突破 234.33(保守壓力)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>2356 英業達</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>56</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>65.4</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>59.5(30M平台) / 54.1(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>67.36(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.33</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 6.04x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 59.5(30M平台) / 54.1(前低)，突破 67.36(保守壓力)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="玻纖布">
+          <header class="card-head">
+            <div>
+              <h2>2383 台光電</h2>
+              <div class="sector">玻纖布</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>56</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>5505</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>5000(30M平台) / 4756.25(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>5670.15(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.33</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.76x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 5000(30M平台) / 4756.25(MA20)，突破 5670.15(保守壓力)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="自選">
+          <header class="card-head">
+            <div>
+              <h2>2492 華新科</h2>
+              <div class="sector">自選</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>56</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>321.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>292.5(30M平台) / 266(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>331.14(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.33</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.45x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 292.5(30M平台) / 266(前低)，突破 331.14(保守壓力)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>6239 力成</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>56</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>311</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>283(30M平台) / 257.5(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>320.33(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.33</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.96x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 283(30M平台) / 257.5(前低)，突破 320.33(保守壓力)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="BBU">
+          <header class="card-head">
+            <div>
+              <h2>4931 新盛力</h2>
+              <div class="sector">BBU</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>56</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>223.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>212(30M平台) / 193(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>227(大量K) / 228(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.30</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 3.00x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 212(30M平台) / 193(前低)，突破 227(大量K) / 228(30M平台)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="光通訊">
+          <header class="card-head">
+            <div>
+              <h2>3081 聯亞</h2>
+              <div class="sector">光通訊</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>56</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>2925</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>2710(30M平台) / 2693.25(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>2970(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.21</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.86x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 2710(30M平台) / 2693.25(MA20)，突破 2970(30M平台)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="光通訊">
+          <header class="card-head">
+            <div>
+              <h2>3450 聯鈞</h2>
+              <div class="sector">光通訊</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>56</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>501</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>459.5(30M平台) / 440(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>504(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.07</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.94x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 459.5(30M平台) / 440(前低)，突破 504(30M平台)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="BBU">
+          <header class="card-head">
+            <div>
+              <h2>2308 台達電</h2>
+              <div class="sector">BBU</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>56</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>2290</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>2132.5(MA20) / 2095(30M平台)</strong></div>
+            <div class="field"><span>壓力</span><strong>2295(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.03</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.50x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 2132.5(MA20) / 2095(30M平台)，突破 2295(30M平台)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="ASIC">
+          <header class="card-head">
+            <div>
+              <h2>2363 矽統</h2>
+              <div class="sector">ASIC</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>53</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>69.2</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>66.7(30M平台) / 62.8(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>70.7(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.60</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.69x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 66.7(30M平台) / 62.8(前低)，突破 70.7(30M平台)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="機器人">
+          <header class="card-head">
+            <div>
+              <h2>1597 直得</h2>
+              <div class="sector">機器人</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>53</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>201</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>183(30M平台) / 168.8(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>207.03(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.34</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.76x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 183(30M平台) / 168.8(MA20)，突破 207.03(保守壓力)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="光通訊">
+          <header class="card-head">
+            <div>
+              <h2>4908 前鼎</h2>
+              <div class="sector">光通訊</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>53</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>293.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>267(30M平台) / 243(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>302.31(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.33</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.67x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 267(30M平台) / 243(前低)，突破 302.31(保守壓力)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="PCB,玻纖布">
+          <header class="card-head">
+            <div>
+              <h2>6274 台燿</h2>
+              <div class="sector">PCB,玻纖布</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>53</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>1600</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>1455(30M平台) / 1325(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>1648(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.33</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.71x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 1455(30M平台) / 1325(前低)，突破 1648(保守壓力)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>6271 同欣電</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>53</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>243.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>226.5(30M平台) / 206(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>249(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.32</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.77x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 226.5(30M平台) / 206(前低)，突破 249(30M平台)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>8150 南茂</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>53</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>86.8</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>80.89(MA20) / 79.1(30M平台)</strong></div>
+            <div class="field"><span>壓力</span><strong>87(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.03</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.60x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 80.89(MA20) / 79.1(30M平台)，突破 87(30M平台)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="ASIC">
+          <header class="card-head">
+            <div>
+              <h2>3661 世芯-KY</h2>
+              <div class="sector">ASIC</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>48</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 高風險盤</span><span class="pill soft">高檔出貨｜偏保守</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>4900</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>空｜偏空</strong></div>
+            <div class="field"><span>支撐</span><strong>4895(30M平台) / 4895(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>4905(前高) / 4990(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>1.00</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 3.71x｜均線下彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>高檔出貨</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：風險偏空<br>關鍵：守住 4895(30M平台) / 4895(前低)，突破 4905(前高) / 4990(30M平台)<br>劇本：盤面風險升高，先保守；反彈若不過壓力仍偏弱；跌破支撐風險會再升高。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="AI伺服器,BBU">
+          <header class="card-head">
+            <div>
+              <h2>3324 雙鴻</h2>
+              <div class="sector">AI伺服器,BBU</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>47</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌫 等待盤</span><span class="pill soft">空方壓縮｜等方向</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>1010</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏空</strong></div>
+            <div class="field"><span>30分K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>支撐</span><strong>1000(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>1035(30M平台) / 1035.42(MA60)</strong></div>
+            <div class="field"><span>RR</span><strong>0.40</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 3.61x｜橫向整理</strong></div>
+            <div class="field"><span>市場狀態</span><strong>空方壓縮</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：盤整待變<br>關鍵：守住 1000(前低)，突破 1035(30M平台) / 1035.42(MA60)，RR 偏緊<br>劇本：等待壓力或支撐其中一邊被確認，再決定追蹤方向。 量縮等待表態。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="MCU">
+          <header class="card-head">
+            <div>
+              <h2>4919 新唐</h2>
+              <div class="sector">MCU</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>40</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>219</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>199.5(30M平台) / 181.5(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>225.57(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.34</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 1.18x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 199.5(30M平台) / 181.5(前低)，突破 225.57(保守壓力)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="PCB">
+          <header class="card-head">
+            <div>
+              <h2>3189 景碩</h2>
+              <div class="sector">PCB</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>40</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>669</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>609(30M平台) / 554(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>689.07(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.33</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.91x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 609(30M平台) / 554(前低)，突破 689.07(保守壓力)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>6147 頎邦</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>40</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>237</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>215.5(30M平台) / 215.5(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>244.11(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.33</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.72x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 215.5(30M平台) / 215.5(前低)，突破 244.11(保守壓力)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="ASIC">
+          <header class="card-head">
+            <div>
+              <h2>2454 聯發科</h2>
+              <div class="sector">ASIC</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>40</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>4245</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>3845(30M平台) / 3550(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>4372.35(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.32</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.89x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 3845(30M平台) / 3550(前低)，突破 4372.35(保守壓力)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>2441 超豐</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>38</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>128.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>117(30M平台) / 106.5(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>132.35(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.33</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.61x｜沿短均線攻擊</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 117(30M平台) / 106.5(前低)，突破 132.35(保守壓力)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>3711 日月光投控</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>38</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">🌤 觀察盤</span><span class="pill soft">末升段｜空間緊</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>617</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>支撐</span><strong>561(30M平台) / 523.17(MA20)</strong></div>
+            <div class="field"><span>壓力</span><strong>635.51(保守壓力)</strong></div>
+            <div class="field"><span>RR</span><strong>0.33</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.51x｜均線上彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>末升</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：高檔震盪<br>關鍵：守住 561(30M平台) / 523.17(MA20)，突破 635.51(保守壓力)，RR 偏緊<br>劇本：若量能無法延續，不追高；失守支撐先控風險。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>6515 穎崴</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>35</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 高風險盤</span><span class="pill soft">主跌空｜偏保守</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>8850</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏空</strong></div>
+            <div class="field"><span>30分K方向</span><strong>空｜偏空</strong></div>
+            <div class="field"><span>支撐</span><strong>8700(前低) / 8615(30M平台)</strong></div>
+            <div class="field"><span>壓力</span><strong>9030(30M平台) / 9510(前高)</strong></div>
+            <div class="field"><span>RR</span><strong>0.83</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 3.79x｜均線下彎</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主跌</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：風險偏空<br>關鍵：守住 8700(前低) / 8615(30M平台)，突破 9030(30M平台) / 9510(前高)，RR 偏緊<br>劇本：盤面風險升高，先保守；反彈若不過壓力仍偏弱；跌破支撐風險會再升高。</p></section>
+        </article>
+        
+
+        <article class="stock-card tone-risk" data-cats="PCB">
+          <header class="card-head">
+            <div>
+              <h2>8046 南電</h2>
+              <div class="sector">PCB</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>17</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 高風險盤</span><span class="pill soft">主跌空｜偏保守</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>884</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>空｜偏空</strong></div>
+            <div class="field"><span>支撐</span><strong>880(30M平台) / 872(前低)</strong></div>
+            <div class="field"><span>壓力</span><strong>934(前高) / 934(30M平台)</strong></div>
+            <div class="field"><span>RR</span><strong>0.08</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 2.21x｜沿短均線下殺</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主跌</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>方向：風險偏空<br>關鍵：守住 880(30M平台) / 872(前低)，突破 934(前高) / 934(30M平台)，RR 偏緊<br>劇本：盤面風險升高，先保守；反彈若不過壓力仍偏弱；跌破支撐風險會再升高。</p></section>
+        </article>
+        </div></div>
+  <div class="sub" style="margin-top:12px;">自動產生時間：2026-05-25 22:37</div>
+</div>
+<script>
+  const buttons = document.querySelectorAll('.btn');
+  const searchBox = document.getElementById('searchBox');
+  const cards = document.querySelectorAll('.stock-card[data-cats]');
+  function applyFilter() {
+    const activeBtn = document.querySelector('.btn.active');
+    const cat = activeBtn ? activeBtn.dataset.cat : '全部';
+    const q = (searchBox.value || '').toLowerCase().trim();
+    cards.forEach(card => {
+      const cats = card.dataset.cats || '';
+      const text = card.innerText.toLowerCase();
+      const catOk = (cat === '全部') || cats.includes(cat);
+      const qOk = !q || text.includes(q);
+      card.style.display = (catOk && qOk) ? '' : 'none';
+    });
+  }
+  buttons.forEach(btn => btn.addEventListener('click', () => {buttons.forEach(b => b.classList.remove('active'));btn.classList.add('active');applyFilter();}));
+  searchBox.addEventListener('input', applyFilter);
+</script>
+</body>
+</html>
