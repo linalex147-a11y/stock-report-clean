@@ -1,0 +1,584 @@
+﻿股票,現價,交易狀態,壓力,支撐,AI交易劇本
+5443 均豪,116.0,⚠️ 空間不足｜避開,119.5(平台高) / 131(前高),114.5(平台低) / 109.13(季線大撐),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 3.02%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 119.5 不過可偏空；先看 114.5。</div>
+        <div class=""script-line defensive"">防守線先看 114.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 3.02%｜回檔風險 1.29%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+2492 華新科,241.5,💤 偏多｜平台整理,-,220(平台低) / 206(前低),"
+    <div class=""decision-container"">
+        <div class=""script-line bull"">明天偏強看待｜先等 241.5 附近站穩，再考慮做多。</div>
+        <div class=""script-line defensive"">做多參考：先等平台穩住，再看有沒有續攻機會。</div>
+        <div class=""script-line defensive"">防守線先看 220；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">回檔風險 8.9%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">目前還在平台裡整理，明天只要量能跟上、站穩平台高，才比較有機會往上走。</div>"
+8054 安國,107.0,⚠️ 空間不足｜避開,110.5(平台高),105.5(平台低) / 104.14(季線大撐),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 3.27%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 110.5 不過可偏空；先看 105.5。</div>
+        <div class=""script-line defensive"">防守線先看 105.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 3.27%｜回檔風險 1.4%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+2337 旺宏,141.0,⚠️ 空間不足｜避開,144(平台高) / 162.5(前高),138.5(平台低) / 134.9(季線大撐),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 2.13%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 144 不過可偏空；先看 138.5。</div>
+        <div class=""script-line defensive"">防守線先看 138.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 2.13%｜回檔風險 1.77%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+2367 燿華,64.2,⚡ 跳空過大｜防追高,64.3(前高) / 67.74(季線大壓),63.1(平台低) / 61.93(月線支撐),"
+    <div class=""decision-container"">
+        <div class=""script-line critical"">明天如果直接跳空開高 2.37%，先不要追，等 30 分鐘收完再看。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 64.3 不過可偏空；先看 63.1。</div>
+        <div class=""script-line defensive"">防守線先看 63.1；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 0.16%｜回檔風險 1.71%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">明早跳空已經把節奏打亂，先不要急著追，等 30 分鐘收盤後再決定方向。</div>"
+6919 康霈,101.5,⚡ 跳空過大｜防追高,104(前高) / 107(平台高),101.5(平台低) / 94.9(前低),"
+    <div class=""decision-container"">
+        <div class=""script-line critical"">明天如果直接跳空開高 2.88%，先不要追，等 30 分鐘收完再看。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 104 不過可偏空；先看 101.5。</div>
+        <div class=""script-line defensive"">防守線先看 101.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 2.46%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">明早跳空已經把節奏打亂，先不要急著追，等 30 分鐘收盤後再決定方向。</div>"
+2359 所羅門,127.5,💤 偏多｜平台整理,135(平台高) / 139(前高),127(平台低) / 121.55(月線支撐),"
+    <div class=""decision-container"">
+        <div class=""script-line bull"">明天偏強看待｜先等 135 附近站穩，再考慮做多。</div>
+        <div class=""script-line defensive"">做多參考：先看 135；若 30 分鐘 K 收破 127，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 127；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 5.88%｜回檔風險 0.39%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">目前還在平台裡整理，明天只要量能跟上、站穩平台高，才比較有機會往上走。</div>"
+1513 中興電,149.5,⚠️ 空間不足｜避開,150(前高) / 155.03(季線大壓),148.5(前低) / 148(平台低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 0.33%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 150 不過可偏空；先看 148.5。</div>
+        <div class=""script-line defensive"">防守線先看 148；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 0.33%｜回檔風險 0.67%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+4979 華星光,546.0,⚠️ 空間不足｜避開,551(前高) / 560(平台高),523(前低) / 490.98(季線大撐),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 0.92%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 551 不過可偏空；先看 523。</div>
+        <div class=""script-line defensive"">防守線先看 523；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 0.92%｜回檔風險 4.21%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+3264 欣銓,205.5,⚠️ 偏空｜跌破尋底,214.5(平台高) / 230(前高),205(平台低) / 178.82(季線大撐),"
+    <div class=""decision-container"">
+        <div class=""script-line bear"">明天仍偏弱｜214.5 沒站回前，反彈先當壓力看。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 214.5 不過可偏空；先看 205。</div>
+        <div class=""script-line defensive"">防守線先看 205；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 4.38%｜回檔風險 0.24%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">日K還在偏弱區間，反彈沒站回平台高前，先把壓力看重一點。</div>"
+3017 奇鋐,2340.0,⚠️ 空間不足｜避開,2390(平台高) / 2455(前高),2325(平台低) / 2213.1(季線大撐),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 2.14%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 2390 不過可偏空；先看 2325。</div>
+        <div class=""script-line defensive"">防守線先看 2325；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 2.14%｜回檔風險 0.64%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+3324 雙鴻,943.0,⚠️ 空間不足｜避開,966(平台高) / 995(前高),938(平台低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 2.44%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 966 不過可偏空；先看 938。</div>
+        <div class=""script-line defensive"">防守線先看 938；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 2.44%｜回檔風險 0.53%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+2382 廣達,292.5,⚡ 結構破壞｜開盤破位,293(平台高) / 305.48(季線大壓),290(前低),"
+    <div class=""decision-container"">
+        <div class=""script-line critical"">明天如果一開就跌破平台低，先別硬接，先看有沒有止穩。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 293 不過可偏空；先看 290。</div>
+        <div class=""script-line defensive"">防守線先看 290；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 0.17%｜回檔風險 0.85%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">明早跳空已經把節奏打亂，先不要急著追，等 30 分鐘收盤後再決定方向。</div>"
+3231 緯創,132.0,⚠️ 空間不足｜避開,134.23(季線大壓) / 134.5(平台高),132(平台低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 1.69%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 134.23 不過可偏空；先看 132。</div>
+        <div class=""script-line defensive"">防守線先看 132；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 1.69%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+2376 技嘉,302.0,⚠️ 空間不足｜避開,308(平台高) / 330.5(前高),300.5(平台低) / 298.6(月線支撐),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 1.99%。</div>
+        <div class=""script-line defensive"">做多參考：先看 308；若 30 分鐘 K 收破 300.5，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 300.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 1.99%｜回檔風險 0.5%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+2356 英業達,51.2,⚠️ 空間不足｜避開,52.2(前高) / 52.4(平台高),50.7(平台低) / 48.88(月線支撐),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 1.95%。</div>
+        <div class=""script-line defensive"">做多參考：先看 52.2；若 30 分鐘 K 收破 50.7，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 50.7；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 1.95%｜回檔風險 0.98%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+2301 光寶科,205.0,⚠️ 空間不足｜避開,207.5(前高) / 211.5(平台高),204.5(前低) / 203.5(平台低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 1.22%。</div>
+        <div class=""script-line defensive"">做多參考：先看 207.5；若 30 分鐘 K 收破 204.5，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 203.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 1.22%｜回檔風險 0.24%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+2421 建準,142.0,⚠️ 空間不足｜避開,145(前高) / 146.5(平台高),142(平台低) / 141.82(季線大撐),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 2.11%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 145 不過可偏空；先看 142。</div>
+        <div class=""script-line defensive"">防守線先看 142；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 2.11%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+6669 緯穎,4915.0,⚠️ 空間不足｜避開,4930(平台高) / 5115(前高),4890(前低) / 4795(平台低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 0.31%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 4930 不過可偏空；先看 4890。</div>
+        <div class=""script-line defensive"">防守線先看 4795；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 0.31%｜回檔風險 0.51%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+3706 神達,80.1,⚠️ 空間不足｜避開,80.7(前高) / 81.31(季線大壓),80.1(平台低) / 79.9(前低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 0.75%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 80.7 不過可偏空；先看 80.1。</div>
+        <div class=""script-line defensive"">防守線先看 80.1；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 0.75%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+3035 智原,191.0,⚠️ 空間不足｜避開,193(前高) / 193.5(平台高),188.5(前低) / 186.5(平台低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 1.05%。</div>
+        <div class=""script-line defensive"">做多參考：先看 193；若 30 分鐘 K 收破 188.5，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 186.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 1.05%｜回檔風險 1.31%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+3661 世芯-KY,4595.0,⚠️ 空間不足｜避開,4605(前高) / 4665(平台高),4455.75(月線支撐) / 4430(前低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 0.22%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 4605 不過可偏空；先看 4455.75。</div>
+        <div class=""script-line defensive"">防守線先看 4430；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 0.22%｜回檔風險 3.03%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+3443 創意,4590.0,⚠️ 偏空｜跌破尋底,4810(平台高) / 4845(前高),4465(前低) / 3273.02(季線大撐),"
+    <div class=""decision-container"">
+        <div class=""script-line bear"">明天仍偏弱｜4810 沒站回前，反彈先當壓力看。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 4810 不過可偏空；先看 4465。</div>
+        <div class=""script-line defensive"">防守線先看 4465；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 4.79%｜回檔風險 2.72%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">日K還在偏弱區間，反彈沒站回平台高前，先把壓力看重一點。</div>"
+2454 聯發科,3210.0,💤 偏多｜平台整理,3350(平台高) / 3400(前高),3155(前低) / 3003.5(月線支撐),"
+    <div class=""decision-container"">
+        <div class=""script-line bull"">明天偏強看待｜先等 3350 附近站穩，再考慮做多。</div>
+        <div class=""script-line defensive"">做多參考：先看 3350；若 30 分鐘 K 收破 3155，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 3155；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 4.36%｜回檔風險 1.71%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">目前還在平台裡整理，明天只要量能跟上、站穩平台高，才比較有機會往上走。</div>"
+6526 達發,657.0,⚠️ 空間不足｜避開,663(平台高) / 689(前高),647(前低) / 646(平台低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 0.91%。</div>
+        <div class=""script-line defensive"">做多參考：先看 663；若 30 分鐘 K 收破 647，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 646；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 0.91%｜回檔風險 1.52%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+2363 矽統,59.9,⚠️ 空間不足｜避開,61.4(前高) / 61.8(平台高),59.4(平台低) / 57.48(月線支撐),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 2.5%。</div>
+        <div class=""script-line defensive"">做多參考：先看 61.4；若 30 分鐘 K 收破 59.4，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 59.4；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 2.5%｜回檔風險 0.83%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+8046 南電,827.0,⚠️ 空間不足｜避開,841(平台高),793(平台低) / 786(前低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 1.69%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 841 不過可偏空；先看 793。</div>
+        <div class=""script-line defensive"">防守線先看 793；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 1.69%｜回檔風險 4.11%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+3189 景碩,501.0,⚠️ 空間不足｜避開,513(前高) / 514(平台高),486(前低) / 484.5(平台低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 2.4%。</div>
+        <div class=""script-line defensive"">做多參考：先看 513；若 30 分鐘 K 收破 486，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 484.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 2.4%｜回檔風險 2.99%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+3037 欣興,823.0,⚠️ 空間不足｜避開,828(平台高),816(前低) / 797(平台低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 0.61%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 828 不過可偏空；先看 816。</div>
+        <div class=""script-line defensive"">防守線先看 797；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 0.61%｜回檔風險 0.85%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+2368 金像電,1240.0,⚠️ 偏空｜跌破尋底,1285(平台高) / 1290(前高),1225(平台低) / 1080.22(季線大撐),"
+    <div class=""decision-container"">
+        <div class=""script-line bear"">明天仍偏弱｜1285 沒站回前，反彈先當壓力看。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 1285 不過可偏空；先看 1225。</div>
+        <div class=""script-line defensive"">防守線先看 1225；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 3.63%｜回檔風險 1.21%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">日K還在偏弱區間，反彈沒站回平台高前，先把壓力看重一點。</div>"
+6274 台燿,1205.0,⚡ 跳空過大｜防追高,1300(平台高) / 1305(前高),1200(平台低) / 1196.35(月線支撐),"
+    <div class=""decision-container"">
+        <div class=""script-line critical"">明天如果直接跳空開高 2.86%，先不要追，等 30 分鐘收完再看。</div>
+        <div class=""script-line defensive"">做多參考：先看 1300；若 30 分鐘 K 收破 1200，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 1200；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 7.88%｜回檔風險 0.41%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">明早跳空已經把節奏打亂，先不要急著追，等 30 分鐘收盤後再決定方向。</div>"
+5469 瀚宇博,79.2,⚠️ 空間不足｜避開,79.4(平台高) / 79.6(前高),78.6(前低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 0.25%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 79.4 不過可偏空；先看 78.6。</div>
+        <div class=""script-line defensive"">防守線先看 78.6；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 0.25%｜回檔風險 0.76%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+4958 臻鼎-KY,438.0,⚠️ 空間不足｜避開,444.5(平台高),408.5(平台低) / 392.7(月線支撐),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 1.48%。</div>
+        <div class=""script-line defensive"">做多參考：先看 444.5；若 30 分鐘 K 收破 408.5，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 408.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 1.48%｜回檔風險 6.74%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+8039 台虹,127.0,⚠️ 偏空｜跌破尋底,133.5(平台高) / 144(前高),127(平台低) / 124.26(季線大撐),"
+    <div class=""decision-container"">
+        <div class=""script-line bear"">明天仍偏弱｜133.5 沒站回前，反彈先當壓力看。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 133.5 不過可偏空；先看 127。</div>
+        <div class=""script-line defensive"">防守線先看 127；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 5.12%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">日K還在偏弱區間，反彈沒站回平台高前，先把壓力看重一點。</div>"
+2344 華邦電,115.5,⚠️ 空間不足｜避開,117.5(平台高) / 130.5(前高),113.5(平台低) / 106.29(月線支撐),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 1.73%。</div>
+        <div class=""script-line defensive"">做多參考：先看 117.5；若 30 分鐘 K 收破 113.5，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 113.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 1.73%｜回檔風險 1.73%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+2408 南亞科,274.5,⚠️ 空間不足｜避開,281(平台高) / 311.5(前高),274.5(前低) / 269.5(平台低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 2.37%。</div>
+        <div class=""script-line defensive"">做多參考：先看 281；若 30 分鐘 K 收破 274.5，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 269.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 2.37%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+5351 鈺創,74.4,⚠️ 空間不足｜避開,76.8(平台高) / 87.5(前高),73.5(平台低) / 69.38(季線大撐),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 3.23%。</div>
+        <div class=""script-line defensive"">做多參考：先看 76.8；若 30 分鐘 K 收破 73.5，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 73.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 3.23%｜回檔風險 1.21%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+8299 群聯,2260.0,💤 偏多｜平台整理,2465(平台高) / 2735(前高),2250(平台低) / 2235.75(月線支撐),"
+    <div class=""decision-container"">
+        <div class=""script-line bull"">明天偏強看待｜先等 2465 附近站穩，再考慮做多。</div>
+        <div class=""script-line defensive"">做多參考：先看 2465；若 30 分鐘 K 收破 2250，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 2250；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 9.07%｜回檔風險 0.44%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">目前還在平台裡整理，明天只要量能跟上、站穩平台高，才比較有機會往上走。</div>"
+4967 十銓,261.0,⚠️ 空間不足｜避開,263(平台高) / 278.5(前高),257.5(前低) / 254(平台低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 0.77%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 263 不過可偏空；先看 257.5。</div>
+        <div class=""script-line defensive"">防守線先看 254；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 0.77%｜回檔風險 1.34%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+3260 威剛,406.0,⚠️ 空間不足｜避開,409(平台高) / 425(前高),390(前低) / 388.5(平台低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 0.74%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 409 不過可偏空；先看 390。</div>
+        <div class=""script-line defensive"">防守線先看 388.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 0.74%｜回檔風險 3.94%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+2451 創見,309.5,⚠️ 空間不足｜避開,318(平台高) / 336(前高),306.5(前低) / 306(平台低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 2.75%。</div>
+        <div class=""script-line defensive"">做多參考：先看 318；若 30 分鐘 K 收破 306.5，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 306；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 2.75%｜回檔風險 0.97%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+4908 前鼎,243.0,⚠️ 空間不足｜避開,248(平台高),231.5(前低) / 217.65(月線支撐),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 2.06%。</div>
+        <div class=""script-line defensive"">做多參考：先看 248；若 30 分鐘 K 收破 231.5，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 231.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 2.06%｜回檔風險 4.73%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+3081 聯亞,2590.0,⚡ 結構破壞｜開盤破位,2670(平台高) / 2710(前高),2490(前低) / 2060.43(季線大撐),"
+    <div class=""decision-container"">
+        <div class=""script-line critical"">明天如果一開就跌破平台低，先別硬接，先看有沒有止穩。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 2670 不過可偏空；先看 2490。</div>
+        <div class=""script-line defensive"">防守線先看 2490；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 3.09%｜回檔風險 3.86%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">明早跳空已經把節奏打亂，先不要急著追，等 30 分鐘收盤後再決定方向。</div>"
+3363 上詮,780.0,⚡ 結構破壞｜開盤破位,803(平台高) / 841(前高),775(前低) / 721.57(季線大撐),"
+    <div class=""decision-container"">
+        <div class=""script-line critical"">明天如果一開就跌破平台低，先別硬接，先看有沒有止穩。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 803 不過可偏空；先看 775。</div>
+        <div class=""script-line defensive"">防守線先看 775；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 2.95%｜回檔風險 0.64%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">明早跳空已經把節奏打亂，先不要急著追，等 30 分鐘收盤後再決定方向。</div>"
+3450 聯鈞,413.5,⚠️ 空間不足｜避開,415(平台高),392.5(前低) / 369.68(月線支撐),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 0.36%。</div>
+        <div class=""script-line defensive"">做多參考：先看 415；若 30 分鐘 K 收破 392.5，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 392.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 0.36%｜回檔風險 5.08%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+3163 波若威,949.0,⚠️ 空間不足｜避開,950(前高) / 969(平台高),900(前低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 0.11%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 950 不過可偏空；先看 900。</div>
+        <div class=""script-line defensive"">防守線先看 900；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 0.11%｜回檔風險 5.16%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+2049 上銀,357.0,💤 偏多｜平台整理,376(平台高) / 392.5(前高),356.5(平台低) / 331.15(月線支撐),"
+    <div class=""decision-container"">
+        <div class=""script-line bull"">明天偏強看待｜先等 376 附近站穩，再考慮做多。</div>
+        <div class=""script-line defensive"">做多參考：先看 376；若 30 分鐘 K 收破 356.5，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 356.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 5.32%｜回檔風險 0.14%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">目前還在平台裡整理，明天只要量能跟上、站穩平台高，才比較有機會往上走。</div>"
+1536 和大,49.05,⚠️ 空間不足｜避開,50(平台高) / 51.4(前高),48.65(平台低) / 48.15(前低),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 1.94%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 50 不過可偏空；先看 48.65。</div>
+        <div class=""script-line defensive"">防守線先看 48.65；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 1.94%｜回檔風險 0.82%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
+1597 直得,170.5,💤 偏多｜平台整理,180(平台高) / 189.5(前高),170.5(平台低) / 155(月線支撐),"
+    <div class=""decision-container"">
+        <div class=""script-line bull"">明天偏強看待｜先等 180 附近站穩，再考慮做多。</div>
+        <div class=""script-line defensive"">做多參考：先看 180；若 30 分鐘 K 收破 170.5，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 170.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 5.57%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">目前還在平台裡整理，明天只要量能跟上、站穩平台高，才比較有機會往上走。</div>"
+4562 穎漢,40.2,💤 偏多｜平台整理,41.8(平台高) / 42.95(前高),39.9(平台低) / 39.05(前低),"
+    <div class=""decision-container"">
+        <div class=""script-line bull"">明天偏強看待｜先等 41.8 附近站穩，再考慮做多。</div>
+        <div class=""script-line defensive"">做多參考：先看 41.8；若 30 分鐘 K 收破 39.9，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 39.9；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 3.98%｜回檔風險 0.75%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">目前還在平台裡整理，明天只要量能跟上、站穩平台高，才比較有機會往上走。</div>"
+4571 鈞興-KY,210.5,💤 偏多｜平台整理,227.5(平台高) / 232(前高),206.5(平台低) / 189.4(月線支撐),"
+    <div class=""decision-container"">
+        <div class=""script-line bull"">明天偏強看待｜先等 227.5 附近站穩，再考慮做多。</div>
+        <div class=""script-line defensive"">做多參考：先看 227.5；若 30 分鐘 K 收破 206.5，就先退。</div>
+        <div class=""script-line defensive"">防守線先看 206.5；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 8.08%｜回檔風險 1.9%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">目前還在平台裡整理，明天只要量能跟上、站穩平台高，才比較有機會往上走。</div>"
+2383 台光電,4380.0,⚠️ 偏空｜跌破尋底,4535(平台高) / 4615(前高),4360(平台低) / 3434.48(季線大撐),"
+    <div class=""decision-container"">
+        <div class=""script-line bear"">明天仍偏弱｜4535 沒站回前，反彈先當壓力看。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 4535 不過可偏空；先看 4360。</div>
+        <div class=""script-line defensive"">防守線先看 4360；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 3.54%｜回檔風險 0.46%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">日K還在偏弱區間，反彈沒站回平台高前，先把壓力看重一點。</div>"
+6213 聯茂,235.5,⚠️ 空間不足｜避開,240.5(平台高) / 253(前高),231(平台低) / 201.43(季線大撐),"
+    <div class=""decision-container"">
+        <div class=""script-line warning"">上方空間不大，先別追價，離目標只剩 2.12%。</div>
+        <div class=""script-line defensive"">做空參考：反彈到 240.5 不過可偏空；先看 231。</div>
+        <div class=""script-line defensive"">防守線先看 231；一定要等 30 分鐘 K 收破，才算真的失守。</div>
+        <div class=""badge-row"">
+            <span class=""script-badge status-rr"">上方空間 2.12%｜回檔風險 1.91%</span>
+            <span class=""script-badge status-gap-info"">明天若直接跳空過大，先不追價。</span>
+        </div>
+    </div>
+    <div class=""story-text"">雖然方向還可以，但上方剩下的肉不多，現在追上去容易撞壓，等拉回比較舒服。</div>"
