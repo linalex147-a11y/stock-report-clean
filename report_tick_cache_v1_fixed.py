@@ -6,12 +6,16 @@ import shutil
 import subprocess
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
 import requests
 
-import report_tick_human_v5 as base
+import importlib
+
+BASE_REPORT_MODULE = "report_tick_base_compat"
+base = importlib.import_module(BASE_REPORT_MODULE)
 from config import Config
 from market_cache import MarketCache
 
