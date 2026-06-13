@@ -1,12 +1,9 @@
 
 from __future__ import annotations
 
-import argparse
-import json
 import os
 import shutil
 import subprocess
-import sys
 import traceback
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -15,75 +12,12 @@ from typing import Dict, List, Optional, Tuple
 import html as html_lib
 import importlib.util
 
+import pandas as pd
+import requests
 
-def _status_json_arg(argv: list[str]) -> Optional[Path]:
-    for index, item in enumerate(argv):
-        if item == "--status-json" and index + 1 < len(argv):
-            return Path(argv[index + 1])
-        if item.startswith("--status-json="):
-            return Path(item.split("=", 1)[1])
-    return None
-
-
-STATUS_JSON_PATH = _status_json_arg(sys.argv[1:])
-
-
-def _now_iso() -> str:
-    return datetime.now().isoformat(timespec="seconds")
-
-
-def _write_status_json(
-    *,
-    status: str,
-    exit_code: int,
-    html_path: str = "",
-    csv_path: str = "",
-    telegram_status: str = "unknown",
-    telegram_error: Optional[str] = None,
-    github_status: str = "unknown",
-    github_error: Optional[str] = None,
-    error: Optional[str] = None,
-    started_at: str = "",
-    ended_at: Optional[str] = None,
-) -> None:
-    if STATUS_JSON_PATH is None:
-        return
-    payload = {
-        "status": status,
-        "exit_code": exit_code,
-        "html_path": html_path,
-        "csv_path": csv_path,
-        "telegram": {"status": telegram_status, "error": telegram_error},
-        "github": {"status": github_status, "error": github_error},
-        "error": error,
-        "started_at": started_at,
-        "ended_at": ended_at or _now_iso(),
-    }
-    STATUS_JSON_PATH.parent.mkdir(parents=True, exist_ok=True)
-    STATUS_JSON_PATH.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-
-
-try:
-    import pandas as pd
-    import requests
-
-    import report_tick_human_v5 as base
-    from config import Config
-    from market_cache import MarketCache
-except Exception as _IMPORT_ERROR:
-    _IMPORT_EXIT_CODE = 11 if isinstance(_IMPORT_ERROR, (ImportError, ModuleNotFoundError)) else 10
-    _write_status_json(
-        status="failed",
-        exit_code=_IMPORT_EXIT_CODE,
-        error=f"{type(_IMPORT_ERROR).__name__}: {_IMPORT_ERROR}",
-    )
-    if __name__ == "__main__":
-        print(f"[REPORT ERROR] import failed: {_IMPORT_ERROR}", file=sys.stderr, flush=True)
-        raise SystemExit(_IMPORT_EXIT_CODE)
-    raise
+import report_tick_human_v5 as base
+from config import Config
+from market_cache import MarketCache
 
 
 REPORT_DIR = Path(__file__).resolve().parent
@@ -1120,76 +1054,6 @@ def 產生報表():
     _send_tg(html_path, sys_cfg)
     _git_sync()
 
-def _main(argv: Optional[List[str]] = None) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--status-json", dest="status_json", default=None)
-    parser.parse_known_args(argv)
-
-    started_at = _now_iso()
-    _write_status_json(status="running", exit_code=0, started_at=started_at, ended_at="")
-
-    try:
-        entrypoint = globals().get("產生報表")
-        if not callable(entrypoint):
-            message = "Report entrypoint not found: 產生報表"
-            print(f"[REPORT ERROR] {message}", file=sys.stderr, flush=True)
-            _write_status_json(
-                status="failed",
-                exit_code=1,
-                error=message,
-                started_at=started_at,
-            )
-            return 1
-
-        entrypoint()
-
-        outdir = _cfg("報表輸出目錄", "report_out")
-        today = _today()
-        csv_path = os.path.join(outdir, f"report_{today}.csv")
-        html_path = os.path.join(outdir, f"report_{today}.html")
-        if os.path.exists(csv_path) and os.path.exists(html_path):
-            _write_status_json(
-                status="success",
-                exit_code=0,
-                html_path=str(Path(html_path).resolve()),
-                csv_path=str(Path(csv_path).resolve()),
-                telegram_status="unknown",
-                github_status="unknown",
-                started_at=started_at,
-            )
-            return 0
-
-        message = "Report output HTML/CSV was not created"
-        print(f"[REPORT ERROR] {message}", file=sys.stderr, flush=True)
-        _write_status_json(
-            status="failed",
-            exit_code=30,
-            html_path=str(Path(html_path).resolve()),
-            csv_path=str(Path(csv_path).resolve()),
-            error=message,
-            started_at=started_at,
-        )
-        return 30
-    except SystemExit as exc:
-        code = int(exc.code or 0) if isinstance(exc.code, int) else 1
-        _write_status_json(
-            status="success" if code == 0 else "failed",
-            exit_code=code,
-            error=None if code == 0 else str(exc),
-            started_at=started_at,
-        )
-        return code
-    except Exception as exc:
-        print(traceback.format_exc(), file=sys.stderr, flush=True)
-        _write_status_json(
-            status="failed",
-            exit_code=1,
-            error=f"{type(exc).__name__}: {exc}",
-            started_at=started_at,
-        )
-        return 1
-
 
 if __name__ == "__main__":
-    raise SystemExit(_main())
     產生報表()
