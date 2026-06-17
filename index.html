@@ -5,56 +5,53 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI多週期盤後結構報表</title>
 <style>
-body { margin:0; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif; background:#f5f7fb; color:#111827; }
-.container { max-width:1600px; margin:0 auto; padding:20px; }
-.topbar { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; margin-bottom:18px; }
+:root { --bg:#f5f7fb; --panel:#fff; --dark:#172033; --text:#0f172a; --muted:#64748b; --border:#e2e8f0; --green:#16a34a; --green-soft:#dcfce7; --red:#dc2626; --red-soft:#fee2e2; --blue:#2563eb; --blue-soft:#dbeafe; }
+* { box-sizing:border-box; }
+body { margin:0; padding:18px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif; background:var(--bg); color:var(--text); }
+.container { max-width:1680px; margin:0 auto; }
+.topbar { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; margin-bottom:16px; }
+.brand h1 { margin:0; font-size:28px; line-height:1.2; } .sub { color:var(--muted); margin:6px 0 0; font-size:13px; }
+.update-card,.dash-card,.section { background:var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow:0 8px 24px rgba(15,23,42,.08); }
+.update-card { padding:12px 16px; min-width:280px; } .update-title { font-weight:900; } .update-sub { color:var(--muted); font-size:12px; margin-top:4px; }
 .dash-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:14px 0 18px; }
-.dash-card, .section, .update-card { background:rgba(255,255,255,.96); border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 8px 24px rgba(17,24,39,.06); }
-.dash-card { padding:16px; }
-.section { padding:14px; margin-top:16px; }
-.dash-k { color:#6b7280; font-size:13px; margin-bottom:8px; }
-.dash-v { font-size:24px; font-weight:700; }
-.dash-s { color:#6b7280; font-size:12px; margin-top:8px; }
-.toolbar { display:flex; gap:10px; flex-wrap:wrap; margin:16px 0; align-items:center; }
-.btn { border:1px solid #e5e7eb; background:#fff; padding:10px 14px; border-radius:999px; cursor:pointer; }
-.btn.active { background:#111827; color:#fff; border-color:#111827; }
-.search { margin-left:auto; min-width:260px; padding:10px 14px; border-radius:12px; border:1px solid #e5e7eb; }
-table { width:100%; border-collapse:collapse; }
-th, td { border-bottom:1px solid #e5e7eb; padding:12px 10px; vertical-align:top; text-align:left; }
-th { background:#f9fafb; font-size:13px; color:#374151; }
-.stock-main { font-weight:700; }
-.stock-sub { color:#6b7280; font-size:12px; margin-top:4px; }
-.multi-cell, .entry-cell, .script-cell, .script { white-space:pre-wrap; line-height:1.55; }
-.entry-cell { min-width:260px; }
-.sector-badge { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; }
-.sector-hot { background:#dcfce7; color:#166534; border:1px solid #86efac; }
-.sector-warm { background:#fff7ed; color:#9a3412; border:1px solid #fdba74; }
-.sector-neutral { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; }
-.sector-cool { background:#f3f4f6; color:#4b5563; border:1px solid #d1d5db; }
-@media (max-width:900px) { .topbar { flex-direction:column; } .dash-grid { grid-template-columns:1fr 1fr; } .search { min-width:100%; margin-left:0; margin-top:10px; } th,td { padding:12px 10px; font-size:13px; } }
+.dash-card { padding:14px 16px; } .dash-k { color:var(--muted); font-size:12px; font-weight:900; } .dash-v { font-size:20px; font-weight:900; margin-top:6px; } .dash-s { color:var(--muted); font-size:12px; margin-top:6px; }
+.section { margin-top:16px; overflow:hidden; } .section-head { padding:14px 16px; border-bottom:1px solid var(--border); } .section-title { font-size:18px; font-weight:900; } .section-sub { color:var(--muted); font-size:12px; margin-top:4px; }
+.sector-wrap { padding:16px; overflow:auto; } table { width:100%; border-collapse:collapse; min-width:760px; } th { background:#172033; color:white; padding:12px 10px; text-align:left; white-space:nowrap; } td { padding:12px 10px; border-bottom:1px solid var(--border); }
+.sector-badge { display:inline-flex; padding:6px 10px; border-radius:999px; font-weight:800; font-size:12px; }
+.sector-hot { background:#dcfce7; color:#166534; } .sector-warm { background:#fff7ed; color:#9a3412; } .sector-neutral { background:#eff6ff; color:#1d4ed8; } .sector-cool { background:#f3f4f6; color:#4b5563; }
+.toolbar { display:flex; gap:10px; flex-wrap:wrap; margin:16px 0; align-items:center; } .btn { border:1px solid var(--border); background:#fff; padding:9px 13px; border-radius:999px; cursor:pointer; font-weight:800; } .btn.active { background:var(--dark); color:#fff; border-color:var(--dark); } .search { margin-left:auto; min-width:260px; padding:10px 14px; border-radius:12px; border:1px solid var(--border); }
+.card-grid-wrap { display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:14px; padding:16px; }
+.stock-card { border:1px solid var(--border); border-radius:16px; padding:14px; background:#fff; display:grid; gap:12px; border-left:6px solid #94a3b8; min-width:0; }
+.stock-card.tone-long { border-left-color:var(--green); } .stock-card.tone-risk { border-left-color:var(--red); } .stock-card.tone-watch { border-left-color:var(--blue); }
+.card-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; } .card-head h2 { margin:0; font-size:20px; line-height:1.2; } .sector { color:var(--muted); font-size:13px; margin-top:4px; font-weight:700; }
+.score-box { background:#f8fafc; border:1px solid var(--border); border-radius:12px; min-width:86px; text-align:center; padding:8px; } .score-box span { display:block; color:var(--muted); font-size:11px; font-weight:800; } .score-box strong { font-size:22px; }
+.status-row { display:flex; gap:8px; flex-wrap:wrap; } .pill { display:inline-flex; align-items:center; padding:7px 10px; border-radius:999px; background:var(--green-soft); color:#166534; font-weight:900; font-size:13px; } .pill.soft { background:var(--blue-soft); color:#1d4ed8; }
+.card-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; } .field { background:#f8fafc; border:1px solid var(--border); border-radius:12px; padding:9px 10px; min-width:0; } .field span { display:block; color:var(--muted); font-size:11px; font-weight:900; margin-bottom:4px; } .field strong { display:block; font-size:13px; line-height:1.45; overflow-wrap:anywhere; }
+.ma60-note { color:var(--muted); font-size:12px; line-height:1.45; margin-top:6px; overflow-wrap:anywhere; }
+.nextday-box,.script-box { border-top:1px solid var(--border); padding-top:10px; } .script-title { font-weight:900; margin-bottom:6px; color:var(--dark); } .nextday-box p,.script-box p { margin:0; line-height:1.65; font-size:14px; overflow-wrap:anywhere; }
+.empty { padding:18px; color:var(--muted); text-align:center; }
+@media (max-width:900px) { body { padding:12px; } .topbar { flex-direction:column; } .dash-grid { grid-template-columns:1fr 1fr; } .search { margin-left:0; min-width:100%; } .card-grid-wrap { grid-template-columns:1fr; padding:12px; } .brand h1 { font-size:23px; } }
+@media (max-width:560px) { .dash-grid { grid-template-columns:1fr; } .card-grid { grid-template-columns:1fr; } .card-head { align-items:stretch; } .score-box { min-width:72px; } body { padding:8px; } }
 </style>
 </head>
 <body>
 <div class="container">
   <div class="topbar">
-    <div>
+    <div class="brand">
       <h1>📊 AI多週期盤後結構報表</h1>
-      <div style="color:#6b7280;margin-top:6px;">整合 日K 趨勢、真實30分K、族群強弱、溫度與情境敘事</div>
+      <p class="sub">手機友善 card 版，保留分類、族群、AI分數、支撐壓力與劇本判讀</p>
     </div>
-    <div class="update-card" style="padding:14px 16px; min-width:260px;">
-      <div>📅</div>
-      <div style="margin-left:12px;">
-        <div>更新時間：2026-06-17 23:01</div>
-        <div style="color:#6b7280;font-size:12px;">每日盤後自動執行同步</div>
-      </div>
+    <div class="update-card">
+      <div class="update-title">更新時間：2026-06-17 23:11</div>
+      <div class="update-sub">每日盤後自動執行同步</div>
     </div>
   </div>
 
   <div class="dash-grid">
     <div class="dash-card"><div class="dash-k">市場情緒</div><div class="dash-v">⚠️ 偏弱保守</div><div class="dash-s">平均分數 5.5｜強勢比 0%</div></div>
     <div class="dash-card"><div class="dash-k">最強族群</div><div class="dash-v">ASIC</div><div class="dash-s">攻擊盤 0｜風險 62</div></div>
-    <div class="dash-card"><div class="dash-k">最強股票</div><div class="dash-v">1597 直得</div><div class="dash-s">總檔數 62</div></div>
-    <div class="dash-card"><div class="dash-k">整體平均</div><div class="dash-v">5.5</div><div class="dash-s">族群 9 個</div></div>
+    <div class="dash-card"><div class="dash-k">最強股票</div><div class="dash-v">1597 直得</div><div class="dash-s">依 AI 分數與 RR 排序</div></div>
+    <div class="dash-card"><div class="dash-k">整體平均</div><div class="dash-v">5.5</div><div class="dash-s">族群 9 個｜股票 62 檔</div></div>
     </div>
 
   <div class="section">
@@ -79,34 +76,1580 @@ th { background:#f9fafb; font-size:13px; color:#374151; }
 <button class="btn" data-cat="光通訊">光通訊</button>
 <button class="btn" data-cat="機器人">機器人</button>
 <button class="btn" data-cat="玻纖布">玻纖布</button>
-    <input id="searchBox" class="search" type="text" placeholder="搜尋股票、族群、情境、劇本...">
+
+    <input id="searchBox" class="search" type="text" placeholder="搜尋股票、族群、狀態、劇本...">
   </div>
 
   <div class="section">
-    <div style="font-size:20px;font-weight:700;margin-bottom:8px;">個股 AI 盤後筆記</div>
-    <div style="color:#6b7280;font-size:13px;margin-bottom:10px;">股票欄已整合股票 / 族群 / AI分數 / 現價；多週期判讀只保留方向 / 位階 / 節奏 / 情緒</div>
-    <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>股票</th><th>多週期判讀</th><th>隔日5分K進場判斷</th><th>情境提醒</th><th>AI策略劇本</th></tr></thead>
-        <tbody><tr data-cats="機器人"><td class='stock-cell'><div class='stock-main'>1597 直得</div><div class='stock-sub'>機器人｜AI 8｜現價 201｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 201，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 183，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 183 - 201，大量K 177 - 183。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 181.3 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 201/183 形成明確方向。</td></tr><tr data-cats="AI伺服器"><td class='stock-cell'><div class='stock-main'>2301 光寶科</div><div class='stock-sub'>AI伺服器｜AI 8｜現價 227.5｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.26x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 227.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 207，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 207 - 227.5，大量K 211.5 - 223。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 207.84 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 227.5/207 形成明確方向。</td></tr><tr data-cats="AI伺服器"><td class='stock-cell'><div class='stock-main'>2356 英業達</div><div class='stock-sub'>AI伺服器｜AI 8｜現價 65.4｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.05x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 65.4，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 59.5，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 59.5 - 65.4，大量K 62.9 - 65.4。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 54.44 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 65.4/59.5 形成明確方向。</td></tr><tr data-cats="玻纖布"><td class='stock-cell'><div class='stock-main'>2383 台光電</div><div class='stock-sub'>玻纖布｜AI 8｜現價 5505｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.01x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 5505，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 4995，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 4995 - 5505，大量K 4800 - 5060。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 4707.17 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 5505/4995 形成明確方向。</td></tr><tr data-cats="ASIC"><td class='stock-cell'><div class='stock-main'>2454 聯發科</div><div class='stock-sub'>ASIC｜AI 8｜現價 4245｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.11x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 4245，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 3780，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 3780 - 4245，大量K 3675 - 3810。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 3498.33 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 4245/3780 形成明確方向。</td></tr><tr data-cats="PCB"><td class='stock-cell'><div class='stock-main'>3189 景碩</div><div class='stock-sub'>PCB｜AI 8｜現價 669｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.19x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 669，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 609，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 609 - 669，大量K 588 - 609。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 539.77 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 669/609 形成明確方向。</td></tr><tr data-cats="封測"><td class='stock-cell'><div class='stock-main'>3711 日月光投控</div><div class='stock-sub'>封測｜AI 8｜現價 617｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 617，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 561，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 561 - 617，大量K 584 - 613。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 519.01 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 617/561 形成明確方向。</td></tr><tr data-cats="光通訊"><td class='stock-cell'><div class='stock-main'>4908 前鼎</div><div class='stock-sub'>光通訊｜AI 8｜現價 293.5｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 293.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 267，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 267 - 293.5，大量K 255 - 267。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 249.93 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 293.5/267 形成明確方向。</td></tr><tr data-cats="封測"><td class='stock-cell'><div class='stock-main'>6147 頎邦</div><div class='stock-sub'>封測｜AI 8｜現價 237｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 237，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 214.5，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 214.5 - 237，大量K 218 - 237。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 215.47 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 237/214.5 形成明確方向。</td></tr><tr data-cats="封測"><td class='stock-cell'><div class='stock-main'>6239 力成</div><div class='stock-sub'>封測｜AI 8｜現價 311｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.01x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 311，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 283，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 283 - 311，大量K 283 - 283。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 256.33 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 311/283 形成明確方向。</td></tr><tr data-cats="PCB,玻纖布"><td class='stock-cell'><div class='stock-main'>6274 台燿</div><div class='stock-sub'>PCB,玻纖布｜AI 8｜現價 1600｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 1600，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 1455，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 1455 - 1600，大量K 1590 - 1600。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 1330.83 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 1600/1455 形成明確方向。</td></tr><tr data-cats="自選"><td class='stock-cell'><div class='stock-main'>6919 康霈</div><div class='stock-sub'>自選｜AI 7｜現價 92.7｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜強空</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>反彈</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.75x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 93，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 89.1，先不預設已轉空。<br>等｜RR 0.08 未達 1.2；區間參考 89.1 - 93，大量K 87 - 88.9。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 91.55 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>這一段重點不在追價，而在看賣壓有沒有真正降下來。</td><td class='script'>先看 89.1 是否有效，若快速收回，較像整理或洗盤。</td></tr><tr data-cats="自選"><td class='stock-cell'><div class='stock-main'>1513 中興電</div><div class='stock-sub'>自選｜AI 6｜現價 167｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏空</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>洗盤</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.51x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 170，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 167，先不預設已轉空。<br>等｜RR - 未達 1.2；區間參考 167 - 170，大量K 167.5 - 170。<br>結論｜30分K為 多｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 167.57 作為壓力/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 170/167 形成明確方向。</td></tr><tr data-cats="機器人"><td class='stock-cell'><div class='stock-main'>1536 和大</div><div class='stock-sub'>機器人｜AI 6｜現價 51.9｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>壓縮等待</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 52.6，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 50.9，先不預設已轉空。<br>等｜RR 0.70 未達 1.2；區間參考 50.9 - 52.6，大量K 50.9 - 52.6。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 50.02 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>這一段重點不在追價，而在看賣壓有沒有真正降下來。</td><td class='script'>先看 50.9 是否有效，若快速收回，較像整理或洗盤。</td></tr><tr data-cats="機器人"><td class='stock-cell'><div class='stock-main'>2049 上銀</div><div class='stock-sub'>機器人｜AI 6｜現價 391.5｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.01x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 401，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 375，先不預設已轉空。<br>等｜RR 0.58 未達 1.2；區間參考 375 - 401，大量K 378 - 395。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 376.47 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 401/375 形成明確方向。</td></tr><tr data-cats="記憶體"><td class='stock-cell'><div class='stock-main'>2344 華邦電</div><div class='stock-sub'>記憶體｜AI 6｜現價 128.5｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 130.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 119，先不預設已轉空。<br>等｜RR 0.21 未達 1.2；區間參考 119 - 130.5，大量K 119 - 126.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 121.09 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 130.5/119 形成明確方向。</td></tr><tr data-cats="ASIC"><td class='stock-cell'><div class='stock-main'>2363 矽統</div><div class='stock-sub'>ASIC｜AI 6｜現價 69.8｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.36x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 72，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 66.1，先不預設已轉空。<br>等｜RR 0.59 未達 1.2；區間參考 66.1 - 72，大量K 66.4 - 70.8。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 62.9 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 72/66.1 形成明確方向。</td></tr><tr data-cats="PCB"><td class='stock-cell'><div class='stock-main'>2368 金像電</div><div class='stock-sub'>PCB｜AI 6｜現價 1430｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.72x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 1455，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 1320，先不預設已轉空。<br>等｜RR 0.23 未達 1.2；區間參考 1320 - 1455，大量K 1315 - 1365。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 1292.42 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 1455/1320 形成明確方向。</td></tr><tr data-cats="AI伺服器"><td class='stock-cell'><div class='stock-main'>2376 技嘉</div><div class='stock-sub'>AI伺服器｜AI 6｜現價 332｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.31x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 343，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 322，先不預設已轉空。<br>等｜RR 1.10 未達 1.2；區間參考 322 - 343，大量K 331 - 343。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 319.46 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 343/322 形成明確方向。</td></tr><tr data-cats="記憶體"><td class='stock-cell'><div class='stock-main'>2408 南亞科</div><div class='stock-sub'>記憶體｜AI 6｜現價 299｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏空</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>洗盤</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待隔日5分K封棒突破 314.5 / 平台高 314.5，且量比需 >= 1.20x；停損看 288 或大量K低 288。<br>空｜等待反彈不過或跌破封棒確認；若仍守 288，先不預設已轉空。<br>等｜區間未脫離，仍需確認距離門檻 1.5%；區間參考 288 - 314.5，大量K 288 - 303.5。<br>結論｜30分K為 多｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 293.07 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 314.5/288 形成明確方向。</td></tr><tr data-cats="AI伺服器"><td class='stock-cell'><div class='stock-main'>2421 建準</div><div class='stock-sub'>AI伺服器｜AI 6｜現價 162.5｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.54x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 166，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 158.5，先不預設已轉空。<br>等｜RR 0.88 未達 1.2；區間參考 158.5 - 166，大量K 153.5 - 163.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 148.9 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 166/158.5 形成明確方向。</td></tr><tr data-cats="封測"><td class='stock-cell'><div class='stock-main'>2441 超豐</div><div class='stock-sub'>封測｜AI 6｜現價 125｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.06x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 128.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 117，先不預設已轉空。<br>等｜RR 0.44 未達 1.2；區間參考 117 - 128.5，大量K 123 - 128.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 108.23 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 128.5/117 形成明確方向。</td></tr><tr data-cats="記憶體"><td class='stock-cell'><div class='stock-main'>2451 創見</div><div class='stock-sub'>記憶體｜AI 6｜現價 315｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏空</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>洗盤</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.02x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 318.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 304，先不預設已轉空。<br>等｜RR 0.32 未達 1.2；區間參考 304 - 318.5，大量K 304 - 315。<br>結論｜30分K為 多｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 316.51 作為壓力/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 318.5/304 形成明確方向。</td></tr><tr data-cats="ASIC"><td class='stock-cell'><div class='stock-main'>3035 智原</div><div class='stock-sub'>ASIC｜AI 6｜現價 224｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.30x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 231，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 208.5，先不預設已轉空。<br>等｜RR 0.45 未達 1.2；區間參考 208.5 - 231，大量K 209 - 223.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 198.07 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 231/208.5 形成明確方向。</td></tr><tr data-cats="PCB"><td class='stock-cell'><div class='stock-main'>3037 欣興</div><div class='stock-sub'>PCB｜AI 6｜現價 998｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.22x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 1030，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 968，先不預設已轉空。<br>等｜RR 1.07 未達 1.2；區間參考 968 - 1030，大量K 931 - 974。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 870.38 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 1030/968 形成明確方向。</td></tr><tr data-cats="AI伺服器"><td class='stock-cell'><div class='stock-main'>3231 緯創</div><div class='stock-sub'>AI伺服器｜AI 6｜現價 149｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.33x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 150.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 144.5，先不預設已轉空。<br>等｜RR 0.33 未達 1.2；區間參考 144.5 - 150.5，大量K 147 - 149.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 138.25 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 150.5/144.5 形成明確方向。</td></tr><tr data-cats="封測"><td class='stock-cell'><div class='stock-main'>3265 台星科</div><div class='stock-sub'>封測｜AI 6｜現價 190.5｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>盤整｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.44x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 192，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 186.5，先不預設已轉空。<br>等｜RR 0.38 未達 1.2；區間參考 186.5 - 192，大量K 188.5 - 204.5。<br>結論｜30分K為 盤整｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 190.35 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>結構偏危險，先看防守點，避免在弱勢區追單。</td><td class='script'>風險偏高，若 186.5 失守，優先等待下一次結構重建。</td></tr><tr data-cats="ASIC"><td class='stock-cell'><div class='stock-main'>3443 創意</div><div class='stock-sub'>ASIC｜AI 6｜現價 5395｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.55x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 5560，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 5040，先不預設已轉空。<br>等｜RR 0.46 未達 1.2；區間參考 5040 - 5560，大量K 5050 - 5195。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 4820.58 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 5560/5040 形成明確方向。</td></tr><tr data-cats="光通訊"><td class='stock-cell'><div class='stock-main'>3450 聯鈞</div><div class='stock-sub'>光通訊｜AI 6｜現價 500｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 503，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 459.5，先不預設已轉空。<br>等｜RR 0.07 未達 1.2；區間參考 459.5 - 503，大量K 490 - 503。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 426.64 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 503/459.5 形成明確方向。</td></tr><tr data-cats="ASIC"><td class='stock-cell'><div class='stock-main'>3661 世芯-KY</div><div class='stock-sub'>ASIC｜AI 6｜現價 4930｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>盤整｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.40x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 5050，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 4885，先不預設已轉空。<br>等｜區間未脫離，仍需確認距離門檻 1.5%；區間參考 4885 - 5050，大量K 4930 - 5050。<br>結論｜30分K為 盤整｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 4695.75 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>結構偏危險，先看防守點，避免在弱勢區追單。</td><td class='script'>風險偏高，若 4885 失守，優先等待下一次結構重建。</td></tr><tr data-cats="AI伺服器"><td class='stock-cell'><div class='stock-main'>3706 神達</div><div class='stock-sub'>AI伺服器｜AI 6｜現價 88.3｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.33x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 89.3，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 87.2，先不預設已轉空。<br>等｜RR 0.91 未達 1.2；區間參考 87.2 - 89.3，大量K 87.2 - 89.3。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 82.36 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 89.3/87.2 形成明確方向。</td></tr><tr data-cats="機器人"><td class='stock-cell'><div class='stock-main'>4562 穎漢</div><div class='stock-sub'>機器人｜AI 6｜現價 42.2｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏空</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>洗盤</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.01x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待隔日5分K封棒突破 43.8 / 平台高 43.8，且量比需 >= 1.20x；停損看 41.75 或大量K低 41.3。<br>空｜等待反彈不過或跌破封棒確認；若仍守 41.75，先不預設已轉空。<br>等｜區間未脫離，仍需確認距離門檻 1.5%；區間參考 41.75 - 43.8，大量K 41.3 - 43.5。<br>結論｜30分K為 多｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 41.56 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 43.8/41.75 形成明確方向。</td></tr><tr data-cats="機器人"><td class='stock-cell'><div class='stock-main'>4571 鈞興-KY</div><div class='stock-sub'>機器人｜AI 6｜現價 227｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏空</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>洗盤</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.01x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待隔日5分K封棒突破 237.5 / 平台高 237.5，且量比需 >= 1.20x；停損看 226 或大量K低 218.5。<br>空｜等待反彈不過或跌破封棒確認；若仍守 226，先不預設已轉空。<br>等｜區間未脫離，仍需確認距離門檻 1.5%；區間參考 226 - 237.5，大量K 218.5 - 237.5。<br>結論｜30分K為 多｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 222.59 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 237.5/226 形成明確方向。</td></tr><tr data-cats="PCB"><td class='stock-cell'><div class='stock-main'>4958 臻鼎-KY</div><div class='stock-sub'>PCB｜AI 6｜現價 538｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 558，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 516，先不預設已轉空。<br>等｜RR 0.91 未達 1.2；區間參考 516 - 558，大量K 480 - 496.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 448.38 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 558/516 形成明確方向。</td></tr><tr data-cats="記憶體"><td class='stock-cell'><div class='stock-main'>4967 十銓</div><div class='stock-sub'>記憶體｜AI 6｜現價 272｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>壓縮等待</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 273，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 264，先不預設已轉空。<br>等｜RR 0.12 未達 1.2；區間參考 264 - 273，大量K 264 - 272.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 268.32 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>這一段重點不在追價，而在看賣壓有沒有真正降下來。</td><td class='script'>先看 264 是否有效，若快速收回，較像整理或洗盤。</td></tr><tr data-cats="記憶體"><td class='stock-cell'><div class='stock-main'>5351 鈺創</div><div class='stock-sub'>記憶體｜AI 6｜現價 82.1｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.01x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 83.9，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 77.6，先不預設已轉空。<br>等｜RR 0.40 未達 1.2；區間參考 77.6 - 83.9，大量K 77.6 - 82.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 79.39 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 83.9/77.6 形成明確方向。</td></tr><tr data-cats="封測"><td class='stock-cell'><div class='stock-main'>6271 同欣電</div><div class='stock-sub'>封測｜AI 6｜現價 246.5｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.01x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 248.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 226.5，先不預設已轉空。<br>等｜RR 0.10 未達 1.2；區間參考 226.5 - 248.5，大量K 227.5 - 245。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 199.8 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 248.5/226.5 形成明確方向。</td></tr><tr data-cats="ASIC"><td class='stock-cell'><div class='stock-main'>6526 達發</div><div class='stock-sub'>ASIC｜AI 6｜現價 755｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.62x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 774，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 715，先不預設已轉空。<br>等｜RR 0.47 未達 1.2；區間參考 715 - 774，大量K 741 - 758。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 687.6 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 774/715 形成明確方向。</td></tr><tr data-cats="AI伺服器"><td class='stock-cell'><div class='stock-main'>6669 緯穎</div><div class='stock-sub'>AI伺服器｜AI 6｜現價 5695｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.42x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 5880，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 5520，先不預設已轉空。<br>等｜RR 1.06 未達 1.2；區間參考 5520 - 5880，大量K 5330 - 5540。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 5183.17 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 5880/5520 形成明確方向。</td></tr><tr data-cats="PCB"><td class='stock-cell'><div class='stock-main'>8046 南電</div><div class='stock-sub'>PCB｜AI 6｜現價 906｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏空</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>洗盤</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.45x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待隔日5分K封棒突破 947 / 平台高 947，且量比需 >= 1.20x；停損看 903 或大量K低 905。<br>空｜等待反彈不過或跌破封棒確認；若仍守 903，先不預設已轉空。<br>等｜區間未脫離，仍需確認距離門檻 1.5%；區間參考 903 - 947，大量K 905 - 947。<br>結論｜30分K為 多｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 844.02 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 947/903 形成明確方向。</td></tr><tr data-cats="封測"><td class='stock-cell'><div class='stock-main'>8150 南茂</div><div class='stock-sub'>封測｜AI 6｜現價 86.6｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.02x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 87，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 79.1，先不預設已轉空。<br>等｜RR 0.05 未達 1.2；區間參考 79.1 - 87，大量K 83.8 - 87。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 79.21 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 87/79.1 形成明確方向。</td></tr><tr data-cats="ASIC,記憶體"><td class='stock-cell'><div class='stock-main'>8299 群聯</div><div class='stock-sub'>ASIC,記憶體｜AI 6｜現價 2480｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 2540，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 2320，先不預設已轉空。<br>等｜RR 0.38 未達 1.2；區間參考 2320 - 2540，大量K 2320 - 2540。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 2475.58 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 2540/2320 形成明確方向。</td></tr><tr data-cats="自選,PCB"><td class='stock-cell'><div class='stock-main'>2367 燿華</div><div class='stock-sub'>自選,PCB｜AI 4｜現價 62.7｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜強空</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>空｜偏空</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主跌</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.49x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 66.5，不追多。<br>空｜等待反彈不過 66.5 / MA60 背景壓力，或跌破 62.7 封棒確認；目標看 63 或大量K低 66.6。<br>等｜RR - 未達 1.2；區間參考 62.7 - 66.5，大量K 66.6 - 68.8。<br>結論｜30分K為 空｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 63.33 作為壓力/長週期背景，不決定30分K方向</td><td class='script-cell'>結構偏危險，先看防守點，避免在弱勢區追單。</td><td class='script'>風險偏高，若 62.7 失守，優先等待下一次結構重建。</td></tr><tr data-cats="封測"><td class='stock-cell'><div class='stock-main'>2449 京元電子</div><div class='stock-sub'>封測｜AI 4｜現價 309.5｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>壓縮等待</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.49x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 311，不追多。<br>空｜等待反彈不過 311 / MA60 背景壓力，或跌破 305 封棒確認；目標看 303 或大量K低 315.5。<br>等｜RR 0.33 未達 1.2；區間參考 305 - 311，大量K 315.5 - 333。<br>結論｜30分K為 空｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 316.65 作為壓力/長週期背景，不決定30分K方向</td><td class='script-cell'>結構偏危險，先看防守點，避免在弱勢區追單。</td><td class='script'>風險偏高，若 305 失守，優先等待下一次結構重建。</td></tr><tr data-cats="記憶體"><td class='stock-cell'><div class='stock-main'>3260 威剛</div><div class='stock-sub'>記憶體｜AI 4｜現價 409｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏空</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>空｜偏空</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主跌</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.01x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 421.5，不追多。<br>空｜等待反彈不過 421.5 / MA60 背景壓力，或跌破 405 封棒確認；目標看 408.5 或大量K低 405。<br>等｜區間未脫離，仍需確認距離門檻 1.5%；區間參考 405 - 421.5，大量K 405 - 421.5。<br>結論｜30分K為 空｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 410.88 作為壓力/長週期背景，不決定30分K方向</td><td class='script-cell'>結構偏危險，先看防守點，避免在弱勢區追單。</td><td class='script'>風險偏高，若 405 失守，優先等待下一次結構重建。</td></tr><tr data-cats="自選,記憶體"><td class='stock-cell'><div class='stock-main'>2337 旺宏</div><div class='stock-sub'>自選,記憶體｜AI 4｜現價 146.5｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏空</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜中性</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>壓縮等待</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.37x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待隔日5分K封棒突破 148 / 平台高 148，且量比需 >= 1.20x；停損看 145.5 或大量K低 145。<br>空｜等待反彈不過或跌破封棒確認；若仍守 145.5，先不預設已轉空。<br>等｜短均線中性；區間參考 145.5 - 148，大量K 145 - 148。<br>結論｜30分K為 多｜中性；隔日只看封棒確認，不使用未發生5分K。MA60 141.96 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>這一段重點不在追價，而在看賣壓有沒有真正降下來。</td><td class='script'>先看 145.5 是否有效，若快速收回，較像整理或洗盤。</td></tr><tr data-cats="AI伺服器"><td class='stock-cell'><div class='stock-main'>2382 廣達</div><div class='stock-sub'>AI伺服器｜AI 4｜現價 322｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>壓縮等待</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.69x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 325，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 315，先不預設已轉空。<br>等｜RR 0.43 未達 1.2；區間參考 315 - 325，大量K 319 - 324。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 303.29 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>這一段重點不在追價，而在看賣壓有沒有真正降下來。</td><td class='script'>先看 315 是否有效，若快速收回，較像整理或洗盤。</td></tr><tr data-cats="自選"><td class='stock-cell'><div class='stock-main'>2492 華新科</div><div class='stock-sub'>自選｜AI 4｜現價 409｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>盤整｜偏空</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>洗盤</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>放量｜RV 1.12x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 441，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 409，先不預設已轉空。<br>等｜RR - 未達 1.2；區間參考 409 - 441，大量K 371.5 - 377。<br>結論｜30分K為 盤整｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 418.16 作為壓力/長週期背景，不決定30分K方向</td><td class='script-cell'>結構偏危險，先看防守點，避免在弱勢區追單。</td><td class='script'>風險偏高，若 409 失守，優先等待下一次結構重建。</td></tr><tr data-cats="AI伺服器"><td class='stock-cell'><div class='stock-main'>3017 奇鋐</div><div class='stock-sub'>AI伺服器｜AI 4｜現價 2615｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>壓縮等待</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.67x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 2640，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 2520，先不預設已轉空。<br>等｜RR 0.26 未達 1.2；區間參考 2520 - 2640，大量K 2505 - 2610。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 2453.92 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>這一段重點不在追價，而在看賣壓有沒有真正降下來。</td><td class='script'>先看 2520 是否有效，若快速收回，較像整理或洗盤。</td></tr><tr data-cats="光通訊"><td class='stock-cell'><div class='stock-main'>3081 聯亞</div><div class='stock-sub'>光通訊｜AI 4｜現價 2970｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 2980，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 2695，先不預設已轉空。<br>等｜RR 0.04 未達 1.2；區間參考 2695 - 2980，大量K 2730 - 2900。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 2653.83 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 2980/2695 形成明確方向。</td></tr><tr data-cats="光通訊"><td class='stock-cell'><div class='stock-main'>3163 波若威</div><div class='stock-sub'>光通訊｜AI 4｜現價 1235｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.01x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 1255，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 1145，先不預設已轉空。<br>等｜RR 0.22 未達 1.2；區間參考 1145 - 1255，大量K 1185 - 1255。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 1006.6 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 1255/1145 形成明確方向。</td></tr><tr data-cats="自選"><td class='stock-cell'><div class='stock-main'>3264 欣銓</div><div class='stock-sub'>自選｜AI 4｜現價 227.5｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏空</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>洗盤</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.43x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 233，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 227.5，先不預設已轉空。<br>等｜RR - 未達 1.2；區間參考 227.5 - 233，大量K 224 - 233。<br>結論｜30分K為 多｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 218.63 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 233/227.5 形成明確方向。</td></tr><tr data-cats="光通訊"><td class='stock-cell'><div class='stock-main'>3363 上詮</div><div class='stock-sub'>光通訊｜AI 4｜現價 860｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜強多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主升</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.03x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待隔日5分K封棒突破 890 / 平台高 890，且量比需 >= 1.20x；停損看 848 或大量K低 850。<br>空｜等待反彈不過或跌破封棒確認；若仍守 848，先不預設已轉空。<br>等｜區間未脫離，仍需確認距離門檻 1.5%；區間參考 848 - 890，大量K 850 - 890。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 814.5 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 890/848 形成明確方向。</td></tr><tr data-cats="玻纖布"><td class='stock-cell'><div class='stock-main'>6213 聯茂</div><div class='stock-sub'>玻纖布｜AI 4｜現價 271.5｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>壓縮等待</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.02x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 276，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 261，先不預設已轉空。<br>等｜RR 0.43 未達 1.2；區間參考 261 - 276，大量K 250 - 270.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 248.92 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>這一段重點不在追價，而在看賣壓有沒有真正降下來。</td><td class='script'>先看 261 是否有效，若快速收回，較像整理或洗盤。</td></tr><tr data-cats="PCB,玻纖布"><td class='stock-cell'><div class='stock-main'>8039 台虹</div><div class='stock-sub'>PCB,玻纖布｜AI 4｜現價 147.5｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏空</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>洗盤</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.36x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 151.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 147.5，先不預設已轉空。<br>等｜RR - 未達 1.2；區間參考 147.5 - 151.5，大量K 141 - 149.5。<br>結論｜30分K為 多｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 137.33 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>目前比較像整理期，先觀察區間是否被打破。</td><td class='script'>目前偏整理，等待 151.5/147.5 形成明確方向。</td></tr><tr data-cats="自選,機器人"><td class='stock-cell'><div class='stock-main'>2359 所羅門</div><div class='stock-sub'>自選,機器人｜AI 2｜現價 134.5｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏空</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>空｜中性</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>壓縮等待</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.51x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 136.5，不追多。<br>空｜等待反彈不過 136.5 / MA60 背景壓力，或跌破 134 封棒確認；目標看 131.5 或大量K低 131.5。<br>等｜短均線中性；區間參考 134 - 136.5，大量K 131.5 - 137。<br>結論｜30分K為 空｜中性；隔日只看封棒確認，不使用未發生5分K。MA60 138.09 作為壓力/長週期背景，不決定30分K方向</td><td class='script-cell'>結構偏危險，先看防守點，避免在弱勢區追單。</td><td class='script'>風險偏高，若 134 失守，優先等待下一次結構重建。</td></tr><tr data-cats="自選,光通訊"><td class='stock-cell'><div class='stock-main'>4979 華星光</div><div class='stock-sub'>自選,光通訊｜AI 2｜現價 501｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜強空</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>盤整｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>反彈</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.47x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 510，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 475，先不預設已轉空。<br>等｜RR 0.35 未達 1.2；區間參考 475 - 510，大量K 454 - 464。<br>結論｜30分K為 盤整｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 522.01 作為壓力/長週期背景，不決定30分K方向</td><td class='script-cell'>結構偏危險，先看防守點，避免在弱勢區追單。</td><td class='script'>風險偏高，若 475 失守，優先等待下一次結構重建。</td></tr><tr data-cats="封測"><td class='stock-cell'><div class='stock-main'>6515 穎崴</div><div class='stock-sub'>封測｜AI 2｜現價 8820｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜強空</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>空｜中性</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>壓縮等待</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.03x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 9110，不追多。<br>空｜等待反彈不過 9110 / MA60 背景壓力，或跌破 8615 封棒確認；目標看 8700 或大量K低 8800。<br>等｜短均線中性；區間參考 8615 - 9110，大量K 8800 - 9100。<br>結論｜30分K為 空｜中性；隔日只看封棒確認，不使用未發生5分K。MA60 9443.08 作為壓力/長週期背景，不決定30分K方向</td><td class='script-cell'>結構偏危險，先看防守點，避免在弱勢區追單。</td><td class='script'>風險偏高，若 8615 失守，優先等待下一次結構重建。</td></tr><tr data-cats="自選"><td class='stock-cell'><div class='stock-main'>8054 安國</div><div class='stock-sub'>自選｜AI 2｜現價 99.7｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜強空</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>盤整｜偏空</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>主跌</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.63x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 101，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 99.7，先不預設已轉空。<br>等｜RR - 未達 1.2；區間參考 99.7 - 101，大量K 100 - 102.5。<br>結論｜30分K為 盤整｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 101.08 作為壓力/長週期背景，不決定30分K方向</td><td class='script-cell'>結構偏危險，先看防守點，避免在弱勢區追單。</td><td class='script'>風險偏高，若 99.7 失守，優先等待下一次結構重建。</td></tr><tr data-cats="AI伺服器"><td class='stock-cell'><div class='stock-main'>3324 雙鴻</div><div class='stock-sub'>AI伺服器｜AI 2｜現價 1025｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏空</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>反彈</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.40x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 1040，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 1010，先不預設已轉空。<br>等｜RR 1.00 未達 1.2；區間參考 1010 - 1040，大量K 1015 - 1040。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 985.63 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>這一段重點不在追價，而在看賣壓有沒有真正降下來。</td><td class='script'>先看 1010 是否有效，若快速收回，較像整理或洗盤。</td></tr><tr data-cats="自選,機器人"><td class='stock-cell'><div class='stock-main'>5443 均豪</div><div class='stock-sub'>自選,機器人｜AI 2｜現價 105｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏空</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>反彈</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.35x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 105.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 104，先不預設已轉空。<br>等｜RR 0.50 未達 1.2；區間參考 104 - 105.5，大量K 102.5 - 105.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 103.91 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>這一段重點不在追價，而在看賣壓有沒有真正降下來。</td><td class='script'>先看 104 是否有效，若快速收回，較像整理或洗盤。</td></tr><tr data-cats="PCB"><td class='stock-cell'><div class='stock-main'>5469 瀚宇博</div><div class='stock-sub'>PCB｜AI 2｜現價 83.5｜⚠️ 偏弱保守</div></td><td class='multi-cell'><div class='layer'><span class='layer-label'>日K</span><span class='layer-text'>空｜偏多</span></div><div class='layer'><span class='layer-label'>30M</span><span class='layer-text'>多｜偏多</span></div><div class='layer'><span class='layer-label'>位階</span><span class='layer-text'>壓縮等待</span></div><div class='layer'><span class='layer-label'>節奏</span><span class='layer-text'>量縮｜RV 0.00x</span></div><div class='layer'><span class='layer-label'>情緒</span><span class='layer-text'>⚠️ 偏弱保守</span></div></td><td class='entry-cell'>多｜等待 5 分 K 封棒突破確認；若 RR<1.2 或未站上 84.3，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 82.8，先不預設已轉空。<br>等｜RR 1.14 未達 1.2；區間參考 82.8 - 84.3，大量K 83.2 - 84.2。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 80.54 作為支撐/長週期背景，不決定30分K方向</td><td class='script-cell'>這一段重點不在追價，而在看賣壓有沒有真正降下來。</td><td class='script'>先看 82.8 是否有效，若快速收回，較像整理或洗盤。</td></tr></tbody>
-      </table>
-    </div>
+    <div class="section-head"><div class="section-title">個股 AI 盤後卡片</div><div class="section-sub">一檔股票一張 card，手機一列一張；排序：AI分數、RR、結構排序</div></div>
+    <div class="card-grid-wrap">
+        <article class="stock-card tone-risk" data-cats="機器人">
+          <header class="card-head">
+            <div>
+              <h2>1597 直得</h2>
+              <div class="sector">機器人</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>8</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>201</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.00x｜高點墊高</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 201，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 183，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 183 - 201，大量K 177 - 183。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 181.3 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>183</strong></div>
+            <div class="field"><span>壓力</span><strong>201</strong><div class='ma60-note'>MA60 181.3 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：183<br>目標：201<br>RR：0.00</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 201/183 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>2301 光寶科</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>8</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>227.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.26x｜高點墊高</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 227.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 207，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 207 - 227.5，大量K 211.5 - 223。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 207.84 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>207</strong></div>
+            <div class="field"><span>壓力</span><strong>227.5</strong><div class='ma60-note'>MA60 207.84 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：207<br>目標：227.5<br>RR：0.00</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 227.5/207 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>2356 英業達</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>8</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>65.4</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.05x｜高點墊高</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 65.4，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 59.5，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 59.5 - 65.4，大量K 62.9 - 65.4。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 54.44 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>59.5</strong></div>
+            <div class="field"><span>壓力</span><strong>65.4</strong><div class='ma60-note'>MA60 54.44 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：59.5<br>目標：65.4<br>RR：0.00</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 65.4/59.5 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="玻纖布">
+          <header class="card-head">
+            <div>
+              <h2>2383 台光電</h2>
+              <div class="sector">玻纖布</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>8</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>5505</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.01x｜高點墊高</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 5505，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 4995，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 4995 - 5505，大量K 4800 - 5060。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 4707.17 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>4995</strong></div>
+            <div class="field"><span>壓力</span><strong>5505</strong><div class='ma60-note'>MA60 4707.17 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：4995<br>目標：5505<br>RR：0.00</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 5505/4995 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="ASIC">
+          <header class="card-head">
+            <div>
+              <h2>2454 聯發科</h2>
+              <div class="sector">ASIC</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>8</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>4245</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.11x｜高點墊高</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 4245，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 3780，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 3780 - 4245，大量K 3675 - 3810。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 3498.33 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>3780</strong></div>
+            <div class="field"><span>壓力</span><strong>4245</strong><div class='ma60-note'>MA60 3498.33 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：3780<br>目標：4245<br>RR：0.00</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 4245/3780 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="PCB">
+          <header class="card-head">
+            <div>
+              <h2>3189 景碩</h2>
+              <div class="sector">PCB</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>8</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>669</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.19x｜高點墊高</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 669，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 609，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 609 - 669，大量K 588 - 609。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 539.77 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>609</strong></div>
+            <div class="field"><span>壓力</span><strong>669</strong><div class='ma60-note'>MA60 539.77 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：609<br>目標：669<br>RR：0.00</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 669/609 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>3711 日月光投控</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>8</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>617</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.00x｜高點墊高</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 617，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 561，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 561 - 617，大量K 584 - 613。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 519.01 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>561</strong></div>
+            <div class="field"><span>壓力</span><strong>617</strong><div class='ma60-note'>MA60 519.01 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：561<br>目標：617<br>RR：0.00</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 617/561 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="光通訊">
+          <header class="card-head">
+            <div>
+              <h2>4908 前鼎</h2>
+              <div class="sector">光通訊</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>8</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>293.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.00x｜高點墊高</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 293.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 267，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 267 - 293.5，大量K 255 - 267。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 249.93 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>267</strong></div>
+            <div class="field"><span>壓力</span><strong>293.5</strong><div class='ma60-note'>MA60 249.93 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：267<br>目標：293.5<br>RR：0.00</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 293.5/267 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>6147 頎邦</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>8</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>237</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.00x｜高點墊高</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 237，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 214.5，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 214.5 - 237，大量K 218 - 237。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 215.47 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>214.5</strong></div>
+            <div class="field"><span>壓力</span><strong>237</strong><div class='ma60-note'>MA60 215.47 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：214.5<br>目標：237<br>RR：0.00</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 237/214.5 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>6239 力成</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>8</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>311</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.01x｜高點墊高</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 311，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 283，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 283 - 311，大量K 283 - 283。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 256.33 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>283</strong></div>
+            <div class="field"><span>壓力</span><strong>311</strong><div class='ma60-note'>MA60 256.33 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：283<br>目標：311<br>RR：0.00</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 311/283 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="PCB,玻纖布">
+          <header class="card-head">
+            <div>
+              <h2>6274 台燿</h2>
+              <div class="sector">PCB,玻纖布</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>8</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>1600</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.00x｜高點墊高</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 1600，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 1455，先不預設已轉空。<br>等｜RR 0.00 未達 1.2；區間參考 1455 - 1600，大量K 1590 - 1600。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 1330.83 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>1455</strong></div>
+            <div class="field"><span>壓力</span><strong>1600</strong><div class='ma60-note'>MA60 1330.83 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：1455<br>目標：1600<br>RR：0.00</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 1600/1455 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="自選">
+          <header class="card-head">
+            <div>
+              <h2>6919 康霈</h2>
+              <div class="sector">自選</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>7</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">反彈｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>92.7</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜強空</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>反彈</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.75x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 93，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 89.1，先不預設已轉空。<br>等｜RR 0.08 未達 1.2；區間參考 89.1 - 93，大量K 87 - 88.9。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 91.55 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>89.1</strong></div>
+            <div class="field"><span>壓力</span><strong>93</strong><div class='ma60-note'>MA60 91.55 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：89.1<br>目標：93<br>RR：0.08</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>先看 89.1 是否有效，若快速收回，較像整理或洗盤。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="PCB">
+          <header class="card-head">
+            <div>
+              <h2>8046 南電</h2>
+              <div class="sector">PCB</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">洗盤｜多偏空</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>906</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏空</strong></div>
+            <div class="field"><span>市場狀態</span><strong>洗盤</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.45x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待隔日5分K封棒突破 947 / 平台高 947，且量比需 &gt;= 1.20x；停損看 903 或大量K低 905。<br>空｜等待反彈不過或跌破封棒確認；若仍守 903，先不預設已轉空。<br>等｜區間未脫離，仍需確認距離門檻 1.5%；區間參考 903 - 947，大量K 905 - 947。<br>結論｜30分K為 多｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 844.02 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>903</strong></div>
+            <div class="field"><span>壓力</span><strong>947</strong><div class='ma60-note'>MA60 844.02 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：903<br>目標：947<br>RR：13.67</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 947/903 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="機器人">
+          <header class="card-head">
+            <div>
+              <h2>4571 鈞興-KY</h2>
+              <div class="sector">機器人</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">洗盤｜多偏空</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>227</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏空</strong></div>
+            <div class="field"><span>市場狀態</span><strong>洗盤</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.01x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待隔日5分K封棒突破 237.5 / 平台高 237.5，且量比需 &gt;= 1.20x；停損看 226 或大量K低 218.5。<br>空｜等待反彈不過或跌破封棒確認；若仍守 226，先不預設已轉空。<br>等｜區間未脫離，仍需確認距離門檻 1.5%；區間參考 226 - 237.5，大量K 218.5 - 237.5。<br>結論｜30分K為 多｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 222.59 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>226</strong></div>
+            <div class="field"><span>壓力</span><strong>237.5</strong><div class='ma60-note'>MA60 222.59 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：226<br>目標：237.5<br>RR：10.50</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 237.5/226 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="機器人">
+          <header class="card-head">
+            <div>
+              <h2>4562 穎漢</h2>
+              <div class="sector">機器人</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">洗盤｜多偏空</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>42.2</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏空</strong></div>
+            <div class="field"><span>市場狀態</span><strong>洗盤</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.01x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待隔日5分K封棒突破 43.8 / 平台高 43.8，且量比需 &gt;= 1.20x；停損看 41.75 或大量K低 41.3。<br>空｜等待反彈不過或跌破封棒確認；若仍守 41.75，先不預設已轉空。<br>等｜區間未脫離，仍需確認距離門檻 1.5%；區間參考 41.75 - 43.8，大量K 41.3 - 43.5。<br>結論｜30分K為 多｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 41.56 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>41.75</strong></div>
+            <div class="field"><span>壓力</span><strong>43.8</strong><div class='ma60-note'>MA60 41.56 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：41.75<br>目標：43.8<br>RR：3.56</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 43.8/41.75 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="ASIC">
+          <header class="card-head">
+            <div>
+              <h2>3661 世芯-KY</h2>
+              <div class="sector">ASIC</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜盤整偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>4930</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>盤整｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.40x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 5050，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 4885，先不預設已轉空。<br>等｜區間未脫離，仍需確認距離門檻 1.5%；區間參考 4885 - 5050，大量K 4930 - 5050。<br>結論｜30分K為 盤整｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 4695.75 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>4885</strong></div>
+            <div class="field"><span>壓力</span><strong>5050</strong><div class='ma60-note'>MA60 4695.75 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：4885<br>目標：5050<br>RR：2.67</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>風險偏高，若 4885 失守，優先等待下一次結構重建。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="記憶體">
+          <header class="card-head">
+            <div>
+              <h2>2408 南亞科</h2>
+              <div class="sector">記憶體</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">洗盤｜多偏空</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>299</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏空</strong></div>
+            <div class="field"><span>市場狀態</span><strong>洗盤</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.00x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待隔日5分K封棒突破 314.5 / 平台高 314.5，且量比需 &gt;= 1.20x；停損看 288 或大量K低 288。<br>空｜等待反彈不過或跌破封棒確認；若仍守 288，先不預設已轉空。<br>等｜區間未脫離，仍需確認距離門檻 1.5%；區間參考 288 - 314.5，大量K 288 - 303.5。<br>結論｜30分K為 多｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 293.07 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>288</strong></div>
+            <div class="field"><span>壓力</span><strong>314.5</strong><div class='ma60-note'>MA60 293.07 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：288<br>目標：314.5<br>RR：1.41</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 314.5/288 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>2376 技嘉</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>332</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.31x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 343，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 322，先不預設已轉空。<br>等｜RR 1.10 未達 1.2；區間參考 322 - 343，大量K 331 - 343。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 319.46 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>322</strong></div>
+            <div class="field"><span>壓力</span><strong>343</strong><div class='ma60-note'>MA60 319.46 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：322<br>目標：343<br>RR：1.10</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 343/322 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="PCB">
+          <header class="card-head">
+            <div>
+              <h2>3037 欣興</h2>
+              <div class="sector">PCB</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>998</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.22x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 1030，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 968，先不預設已轉空。<br>等｜RR 1.07 未達 1.2；區間參考 968 - 1030，大量K 931 - 974。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 870.38 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>968</strong></div>
+            <div class="field"><span>壓力</span><strong>1030</strong><div class='ma60-note'>MA60 870.38 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：968<br>目標：1030<br>RR：1.07</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 1030/968 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>6669 緯穎</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>5695</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.42x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 5880，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 5520，先不預設已轉空。<br>等｜RR 1.06 未達 1.2；區間參考 5520 - 5880，大量K 5330 - 5540。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 5183.17 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>5520</strong></div>
+            <div class="field"><span>壓力</span><strong>5880</strong><div class='ma60-note'>MA60 5183.17 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：5520<br>目標：5880<br>RR：1.06</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 5880/5520 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>3706 神達</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>88.3</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.33x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 89.3，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 87.2，先不預設已轉空。<br>等｜RR 0.91 未達 1.2；區間參考 87.2 - 89.3，大量K 87.2 - 89.3。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 82.36 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>87.2</strong></div>
+            <div class="field"><span>壓力</span><strong>89.3</strong><div class='ma60-note'>MA60 82.36 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：87.2<br>目標：89.3<br>RR：0.91</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 89.3/87.2 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="PCB">
+          <header class="card-head">
+            <div>
+              <h2>4958 臻鼎-KY</h2>
+              <div class="sector">PCB</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>538</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.00x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 558，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 516，先不預設已轉空。<br>等｜RR 0.91 未達 1.2；區間參考 516 - 558，大量K 480 - 496.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 448.38 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>516</strong></div>
+            <div class="field"><span>壓力</span><strong>558</strong><div class='ma60-note'>MA60 448.38 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：516<br>目標：558<br>RR：0.91</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 558/516 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>2421 建準</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>162.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.54x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 166，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 158.5，先不預設已轉空。<br>等｜RR 0.88 未達 1.2；區間參考 158.5 - 166，大量K 153.5 - 163.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 148.9 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>158.5</strong></div>
+            <div class="field"><span>壓力</span><strong>166</strong><div class='ma60-note'>MA60 148.9 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：158.5<br>目標：166<br>RR：0.88</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 166/158.5 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="機器人">
+          <header class="card-head">
+            <div>
+              <h2>1536 和大</h2>
+              <div class="sector">機器人</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">壓縮等待｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>51.9</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.00x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 52.6，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 50.9，先不預設已轉空。<br>等｜RR 0.70 未達 1.2；區間參考 50.9 - 52.6，大量K 50.9 - 52.6。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 50.02 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>50.9</strong></div>
+            <div class="field"><span>壓力</span><strong>52.6</strong><div class='ma60-note'>MA60 50.02 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：50.9<br>目標：52.6<br>RR：0.70</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>先看 50.9 是否有效，若快速收回，較像整理或洗盤。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="ASIC">
+          <header class="card-head">
+            <div>
+              <h2>2363 矽統</h2>
+              <div class="sector">ASIC</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>69.8</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.36x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 72，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 66.1，先不預設已轉空。<br>等｜RR 0.59 未達 1.2；區間參考 66.1 - 72，大量K 66.4 - 70.8。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 62.9 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>66.1</strong></div>
+            <div class="field"><span>壓力</span><strong>72</strong><div class='ma60-note'>MA60 62.9 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：66.1<br>目標：72<br>RR：0.59</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 72/66.1 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="機器人">
+          <header class="card-head">
+            <div>
+              <h2>2049 上銀</h2>
+              <div class="sector">機器人</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>391.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.01x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 401，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 375，先不預設已轉空。<br>等｜RR 0.58 未達 1.2；區間參考 375 - 401，大量K 378 - 395。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 376.47 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>375</strong></div>
+            <div class="field"><span>壓力</span><strong>401</strong><div class='ma60-note'>MA60 376.47 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：375<br>目標：401<br>RR：0.58</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 401/375 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="ASIC">
+          <header class="card-head">
+            <div>
+              <h2>6526 達發</h2>
+              <div class="sector">ASIC</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>755</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.62x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 774，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 715，先不預設已轉空。<br>等｜RR 0.47 未達 1.2；區間參考 715 - 774，大量K 741 - 758。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 687.6 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>715</strong></div>
+            <div class="field"><span>壓力</span><strong>774</strong><div class='ma60-note'>MA60 687.6 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：715<br>目標：774<br>RR：0.47</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 774/715 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="ASIC">
+          <header class="card-head">
+            <div>
+              <h2>3443 創意</h2>
+              <div class="sector">ASIC</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>5395</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.55x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 5560，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 5040，先不預設已轉空。<br>等｜RR 0.46 未達 1.2；區間參考 5040 - 5560，大量K 5050 - 5195。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 4820.58 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>5040</strong></div>
+            <div class="field"><span>壓力</span><strong>5560</strong><div class='ma60-note'>MA60 4820.58 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：5040<br>目標：5560<br>RR：0.46</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 5560/5040 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="ASIC">
+          <header class="card-head">
+            <div>
+              <h2>3035 智原</h2>
+              <div class="sector">ASIC</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>224</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.30x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 231，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 208.5，先不預設已轉空。<br>等｜RR 0.45 未達 1.2；區間參考 208.5 - 231，大量K 209 - 223.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 198.07 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>208.5</strong></div>
+            <div class="field"><span>壓力</span><strong>231</strong><div class='ma60-note'>MA60 198.07 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：208.5<br>目標：231<br>RR：0.45</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 231/208.5 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>2441 超豐</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>125</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.06x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 128.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 117，先不預設已轉空。<br>等｜RR 0.44 未達 1.2；區間參考 117 - 128.5，大量K 123 - 128.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 108.23 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>117</strong></div>
+            <div class="field"><span>壓力</span><strong>128.5</strong><div class='ma60-note'>MA60 108.23 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：117<br>目標：128.5<br>RR：0.44</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 128.5/117 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="記憶體">
+          <header class="card-head">
+            <div>
+              <h2>5351 鈺創</h2>
+              <div class="sector">記憶體</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>82.1</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.01x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 83.9，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 77.6，先不預設已轉空。<br>等｜RR 0.40 未達 1.2；區間參考 77.6 - 83.9，大量K 77.6 - 82.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 79.39 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>77.6</strong></div>
+            <div class="field"><span>壓力</span><strong>83.9</strong><div class='ma60-note'>MA60 79.39 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：77.6<br>目標：83.9<br>RR：0.40</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 83.9/77.6 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>3265 台星科</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜盤整偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>190.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>盤整｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.44x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 192，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 186.5，先不預設已轉空。<br>等｜RR 0.38 未達 1.2；區間參考 186.5 - 192，大量K 188.5 - 204.5。<br>結論｜30分K為 盤整｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 190.35 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>186.5</strong></div>
+            <div class="field"><span>壓力</span><strong>192</strong><div class='ma60-note'>MA60 190.35 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：186.5<br>目標：192<br>RR：0.38</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>風險偏高，若 186.5 失守，優先等待下一次結構重建。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="ASIC,記憶體">
+          <header class="card-head">
+            <div>
+              <h2>8299 群聯</h2>
+              <div class="sector">ASIC,記憶體</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>2480</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.00x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 2540，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 2320，先不預設已轉空。<br>等｜RR 0.38 未達 1.2；區間參考 2320 - 2540，大量K 2320 - 2540。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 2475.58 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>2320</strong></div>
+            <div class="field"><span>壓力</span><strong>2540</strong><div class='ma60-note'>MA60 2475.58 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：2320<br>目標：2540<br>RR：0.38</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 2540/2320 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>3231 緯創</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>149</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.33x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 150.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 144.5，先不預設已轉空。<br>等｜RR 0.33 未達 1.2；區間參考 144.5 - 150.5，大量K 147 - 149.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 138.25 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>144.5</strong></div>
+            <div class="field"><span>壓力</span><strong>150.5</strong><div class='ma60-note'>MA60 138.25 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：144.5<br>目標：150.5<br>RR：0.33</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 150.5/144.5 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="記憶體">
+          <header class="card-head">
+            <div>
+              <h2>2451 創見</h2>
+              <div class="sector">記憶體</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">洗盤｜多偏空</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>315</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏空</strong></div>
+            <div class="field"><span>市場狀態</span><strong>洗盤</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.02x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 318.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 304，先不預設已轉空。<br>等｜RR 0.32 未達 1.2；區間參考 304 - 318.5，大量K 304 - 315。<br>結論｜30分K為 多｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 316.51 作為壓力/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>304</strong></div>
+            <div class="field"><span>壓力</span><strong>318.5</strong><div class='ma60-note'>MA60 316.51 作為壓力/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：304<br>目標：318.5<br>RR：0.32</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 318.5/304 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="PCB">
+          <header class="card-head">
+            <div>
+              <h2>2368 金像電</h2>
+              <div class="sector">PCB</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>1430</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.72x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 1455，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 1320，先不預設已轉空。<br>等｜RR 0.23 未達 1.2；區間參考 1320 - 1455，大量K 1315 - 1365。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 1292.42 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>1320</strong></div>
+            <div class="field"><span>壓力</span><strong>1455</strong><div class='ma60-note'>MA60 1292.42 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：1320<br>目標：1455<br>RR：0.23</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 1455/1320 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="記憶體">
+          <header class="card-head">
+            <div>
+              <h2>2344 華邦電</h2>
+              <div class="sector">記憶體</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>128.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.00x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 130.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 119，先不預設已轉空。<br>等｜RR 0.21 未達 1.2；區間參考 119 - 130.5，大量K 119 - 126.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 121.09 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>119</strong></div>
+            <div class="field"><span>壓力</span><strong>130.5</strong><div class='ma60-note'>MA60 121.09 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：119<br>目標：130.5<br>RR：0.21</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 130.5/119 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="記憶體">
+          <header class="card-head">
+            <div>
+              <h2>4967 十銓</h2>
+              <div class="sector">記憶體</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">壓縮等待｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>272</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.00x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 273，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 264，先不預設已轉空。<br>等｜RR 0.12 未達 1.2；區間參考 264 - 273，大量K 264 - 272.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 268.32 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>264</strong></div>
+            <div class="field"><span>壓力</span><strong>273</strong><div class='ma60-note'>MA60 268.32 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：264<br>目標：273<br>RR：0.12</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>先看 264 是否有效，若快速收回，較像整理或洗盤。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>6271 同欣電</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>246.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.01x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 248.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 226.5，先不預設已轉空。<br>等｜RR 0.10 未達 1.2；區間參考 226.5 - 248.5，大量K 227.5 - 245。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 199.8 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>226.5</strong></div>
+            <div class="field"><span>壓力</span><strong>248.5</strong><div class='ma60-note'>MA60 199.8 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：226.5<br>目標：248.5<br>RR：0.10</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 248.5/226.5 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="光通訊">
+          <header class="card-head">
+            <div>
+              <h2>3450 聯鈞</h2>
+              <div class="sector">光通訊</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>500</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.00x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 503，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 459.5，先不預設已轉空。<br>等｜RR 0.07 未達 1.2；區間參考 459.5 - 503，大量K 490 - 503。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 426.64 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>459.5</strong></div>
+            <div class="field"><span>壓力</span><strong>503</strong><div class='ma60-note'>MA60 426.64 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：459.5<br>目標：503<br>RR：0.07</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 503/459.5 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>8150 南茂</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>86.6</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.02x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 87，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 79.1，先不預設已轉空。<br>等｜RR 0.05 未達 1.2；區間參考 79.1 - 87，大量K 83.8 - 87。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 79.21 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>79.1</strong></div>
+            <div class="field"><span>壓力</span><strong>87</strong><div class='ma60-note'>MA60 79.21 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：79.1<br>目標：87<br>RR：0.05</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 87/79.1 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="自選">
+          <header class="card-head">
+            <div>
+              <h2>1513 中興電</h2>
+              <div class="sector">自選</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>6</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">洗盤｜多偏空</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>167</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏空</strong></div>
+            <div class="field"><span>市場狀態</span><strong>洗盤</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.51x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 170，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 167，先不預設已轉空。<br>等｜RR - 未達 1.2；區間參考 167 - 170，大量K 167.5 - 170。<br>結論｜30分K為 多｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 167.57 作為壓力/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>167</strong></div>
+            <div class="field"><span>壓力</span><strong>170</strong><div class='ma60-note'>MA60 167.57 作為壓力/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：167<br>目標：170<br>RR：-</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 170/167 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="記憶體">
+          <header class="card-head">
+            <div>
+              <h2>3260 威剛</h2>
+              <div class="sector">記憶體</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>4</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主跌｜空偏空</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>409</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏空</strong></div>
+            <div class="field"><span>30分K方向</span><strong>空｜偏空</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主跌</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.01x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 421.5，不追多。<br>空｜等待反彈不過 421.5 / MA60 背景壓力，或跌破 405 封棒確認；目標看 408.5 或大量K低 405。<br>等｜區間未脫離，仍需確認距離門檻 1.5%；區間參考 405 - 421.5，大量K 405 - 421.5。<br>結論｜30分K為 空｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 410.88 作為壓力/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>405</strong></div>
+            <div class="field"><span>壓力</span><strong>421.5</strong><div class='ma60-note'>MA60 410.88 作為壓力/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：405<br>目標：421.5<br>RR：3.12</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>風險偏高，若 405 失守，優先等待下一次結構重建。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="光通訊">
+          <header class="card-head">
+            <div>
+              <h2>3363 上詮</h2>
+              <div class="sector">光通訊</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>4</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>860</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.03x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待隔日5分K封棒突破 890 / 平台高 890，且量比需 &gt;= 1.20x；停損看 848 或大量K低 850。<br>空｜等待反彈不過或跌破封棒確認；若仍守 848，先不預設已轉空。<br>等｜區間未脫離，仍需確認距離門檻 1.5%；區間參考 848 - 890，大量K 850 - 890。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 814.5 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>848</strong></div>
+            <div class="field"><span>壓力</span><strong>890</strong><div class='ma60-note'>MA60 814.5 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：848<br>目標：890<br>RR：2.50</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 890/848 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="自選,記憶體">
+          <header class="card-head">
+            <div>
+              <h2>2337 旺宏</h2>
+              <div class="sector">自選,記憶體</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>4</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">壓縮等待｜多中性</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>146.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏空</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜中性</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.37x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待隔日5分K封棒突破 148 / 平台高 148，且量比需 &gt;= 1.20x；停損看 145.5 或大量K低 145。<br>空｜等待反彈不過或跌破封棒確認；若仍守 145.5，先不預設已轉空。<br>等｜短均線中性；區間參考 145.5 - 148，大量K 145 - 148。<br>結論｜30分K為 多｜中性；隔日只看封棒確認，不使用未發生5分K。MA60 141.96 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>145.5</strong></div>
+            <div class="field"><span>壓力</span><strong>148</strong><div class='ma60-note'>MA60 141.96 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：145.5<br>目標：148<br>RR：1.50</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>先看 145.5 是否有效，若快速收回，較像整理或洗盤。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>2382 廣達</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>4</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">壓縮等待｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>322</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.69x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 325，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 315，先不預設已轉空。<br>等｜RR 0.43 未達 1.2；區間參考 315 - 325，大量K 319 - 324。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 303.29 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>315</strong></div>
+            <div class="field"><span>壓力</span><strong>325</strong><div class='ma60-note'>MA60 303.29 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：315<br>目標：325<br>RR：0.43</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>先看 315 是否有效，若快速收回，較像整理或洗盤。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="玻纖布">
+          <header class="card-head">
+            <div>
+              <h2>6213 聯茂</h2>
+              <div class="sector">玻纖布</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>4</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">壓縮等待｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>271.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.02x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 276，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 261，先不預設已轉空。<br>等｜RR 0.43 未達 1.2；區間參考 261 - 276，大量K 250 - 270.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 248.92 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>261</strong></div>
+            <div class="field"><span>壓力</span><strong>276</strong><div class='ma60-note'>MA60 248.92 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：261<br>目標：276<br>RR：0.43</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>先看 261 是否有效，若快速收回，較像整理或洗盤。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>2449 京元電子</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>4</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">壓縮等待｜空偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>309.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.49x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 311，不追多。<br>空｜等待反彈不過 311 / MA60 背景壓力，或跌破 305 封棒確認；目標看 303 或大量K低 315.5。<br>等｜RR 0.33 未達 1.2；區間參考 305 - 311，大量K 315.5 - 333。<br>結論｜30分K為 空｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 316.65 作為壓力/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>305</strong></div>
+            <div class="field"><span>壓力</span><strong>311</strong><div class='ma60-note'>MA60 316.65 作為壓力/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：305<br>目標：311<br>RR：0.33</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>風險偏高，若 305 失守，優先等待下一次結構重建。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>3017 奇鋐</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>4</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">壓縮等待｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>2615</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.67x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 2640，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 2520，先不預設已轉空。<br>等｜RR 0.26 未達 1.2；區間參考 2520 - 2640，大量K 2505 - 2610。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 2453.92 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>2520</strong></div>
+            <div class="field"><span>壓力</span><strong>2640</strong><div class='ma60-note'>MA60 2453.92 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：2520<br>目標：2640<br>RR：0.26</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>先看 2520 是否有效，若快速收回，較像整理或洗盤。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="光通訊">
+          <header class="card-head">
+            <div>
+              <h2>3163 波若威</h2>
+              <div class="sector">光通訊</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>4</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>1235</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.01x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 1255，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 1145，先不預設已轉空。<br>等｜RR 0.22 未達 1.2；區間參考 1145 - 1255，大量K 1185 - 1255。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 1006.6 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>1145</strong></div>
+            <div class="field"><span>壓力</span><strong>1255</strong><div class='ma60-note'>MA60 1006.6 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：1145<br>目標：1255<br>RR：0.22</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 1255/1145 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="光通訊">
+          <header class="card-head">
+            <div>
+              <h2>3081 聯亞</h2>
+              <div class="sector">光通訊</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>4</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主升｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>2970</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜強多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主升</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.00x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 2980，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 2695，先不預設已轉空。<br>等｜RR 0.04 未達 1.2；區間參考 2695 - 2980，大量K 2730 - 2900。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 2653.83 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>2695</strong></div>
+            <div class="field"><span>壓力</span><strong>2980</strong><div class='ma60-note'>MA60 2653.83 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：2695<br>目標：2980<br>RR：0.04</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 2980/2695 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="自選,PCB">
+          <header class="card-head">
+            <div>
+              <h2>2367 燿華</h2>
+              <div class="sector">自選,PCB</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>4</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主跌｜空偏空</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>62.7</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜強空</strong></div>
+            <div class="field"><span>30分K方向</span><strong>空｜偏空</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主跌</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.49x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 66.5，不追多。<br>空｜等待反彈不過 66.5 / MA60 背景壓力，或跌破 62.7 封棒確認；目標看 63 或大量K低 66.6。<br>等｜RR - 未達 1.2；區間參考 62.7 - 66.5，大量K 66.6 - 68.8。<br>結論｜30分K為 空｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 63.33 作為壓力/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>62.7</strong></div>
+            <div class="field"><span>壓力</span><strong>66.5</strong><div class='ma60-note'>MA60 63.33 作為壓力/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：62.7<br>目標：66.5<br>RR：-</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>風險偏高，若 62.7 失守，優先等待下一次結構重建。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="自選">
+          <header class="card-head">
+            <div>
+              <h2>2492 華新科</h2>
+              <div class="sector">自選</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>4</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">洗盤｜盤整偏空</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>409</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>盤整｜偏空</strong></div>
+            <div class="field"><span>市場狀態</span><strong>洗盤</strong></div>
+            <div class="field"><span>量價判讀</span><strong>放量｜RV 1.12x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 441，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 409，先不預設已轉空。<br>等｜RR - 未達 1.2；區間參考 409 - 441，大量K 371.5 - 377。<br>結論｜30分K為 盤整｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 418.16 作為壓力/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>409</strong></div>
+            <div class="field"><span>壓力</span><strong>441</strong><div class='ma60-note'>MA60 418.16 作為壓力/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：409<br>目標：441<br>RR：-</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>風險偏高，若 409 失守，優先等待下一次結構重建。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="自選">
+          <header class="card-head">
+            <div>
+              <h2>3264 欣銓</h2>
+              <div class="sector">自選</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>4</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">洗盤｜多偏空</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>227.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏空</strong></div>
+            <div class="field"><span>市場狀態</span><strong>洗盤</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.43x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 233，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 227.5，先不預設已轉空。<br>等｜RR - 未達 1.2；區間參考 227.5 - 233，大量K 224 - 233。<br>結論｜30分K為 多｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 218.63 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>227.5</strong></div>
+            <div class="field"><span>壓力</span><strong>233</strong><div class='ma60-note'>MA60 218.63 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：227.5<br>目標：233<br>RR：-</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 233/227.5 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="PCB,玻纖布">
+          <header class="card-head">
+            <div>
+              <h2>8039 台虹</h2>
+              <div class="sector">PCB,玻纖布</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>4</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">洗盤｜多偏空</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>147.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏空</strong></div>
+            <div class="field"><span>市場狀態</span><strong>洗盤</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.36x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 151.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 147.5，先不預設已轉空。<br>等｜RR - 未達 1.2；區間參考 147.5 - 151.5，大量K 141 - 149.5。<br>結論｜30分K為 多｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 137.33 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>147.5</strong></div>
+            <div class="field"><span>壓力</span><strong>151.5</strong><div class='ma60-note'>MA60 137.33 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：147.5<br>目標：151.5<br>RR：-</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>目前偏整理，等待 151.5/147.5 形成明確方向。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="自選,機器人">
+          <header class="card-head">
+            <div>
+              <h2>2359 所羅門</h2>
+              <div class="sector">自選,機器人</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>2</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">壓縮等待｜空中性</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>134.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏空</strong></div>
+            <div class="field"><span>30分K方向</span><strong>空｜中性</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.51x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 136.5，不追多。<br>空｜等待反彈不過 136.5 / MA60 背景壓力，或跌破 134 封棒確認；目標看 131.5 或大量K低 131.5。<br>等｜短均線中性；區間參考 134 - 136.5，大量K 131.5 - 137。<br>結論｜30分K為 空｜中性；隔日只看封棒確認，不使用未發生5分K。MA60 138.09 作為壓力/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>134</strong></div>
+            <div class="field"><span>壓力</span><strong>136.5</strong><div class='ma60-note'>MA60 138.09 作為壓力/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：134<br>目標：136.5<br>RR：4.00</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>風險偏高，若 134 失守，優先等待下一次結構重建。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="封測">
+          <header class="card-head">
+            <div>
+              <h2>6515 穎崴</h2>
+              <div class="sector">封測</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>2</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">壓縮等待｜空中性</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>8820</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜強空</strong></div>
+            <div class="field"><span>30分K方向</span><strong>空｜中性</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.03x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 9110，不追多。<br>空｜等待反彈不過 9110 / MA60 背景壓力，或跌破 8615 封棒確認；目標看 8700 或大量K低 8800。<br>等｜短均線中性；區間參考 8615 - 9110，大量K 8800 - 9100。<br>結論｜30分K為 空｜中性；隔日只看封棒確認，不使用未發生5分K。MA60 9443.08 作為壓力/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>8615</strong></div>
+            <div class="field"><span>壓力</span><strong>9110</strong><div class='ma60-note'>MA60 9443.08 作為壓力/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：8615<br>目標：9110<br>RR：1.41</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>風險偏高，若 8615 失守，優先等待下一次結構重建。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="PCB">
+          <header class="card-head">
+            <div>
+              <h2>5469 瀚宇博</h2>
+              <div class="sector">PCB</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>2</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">壓縮等待｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>83.5</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏多</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>壓縮等待</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.00x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 84.3，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 82.8，先不預設已轉空。<br>等｜RR 1.14 未達 1.2；區間參考 82.8 - 84.3，大量K 83.2 - 84.2。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 80.54 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>82.8</strong></div>
+            <div class="field"><span>壓力</span><strong>84.3</strong><div class='ma60-note'>MA60 80.54 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：82.8<br>目標：84.3<br>RR：1.14</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>先看 82.8 是否有效，若快速收回，較像整理或洗盤。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="AI伺服器">
+          <header class="card-head">
+            <div>
+              <h2>3324 雙鴻</h2>
+              <div class="sector">AI伺服器</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>2</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">反彈｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>1025</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏空</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>反彈</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.40x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 1040，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 1010，先不預設已轉空。<br>等｜RR 1.00 未達 1.2；區間參考 1010 - 1040，大量K 1015 - 1040。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 985.63 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>1010</strong></div>
+            <div class="field"><span>壓力</span><strong>1040</strong><div class='ma60-note'>MA60 985.63 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：1010<br>目標：1040<br>RR：1.00</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>先看 1010 是否有效，若快速收回，較像整理或洗盤。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="自選,機器人">
+          <header class="card-head">
+            <div>
+              <h2>5443 均豪</h2>
+              <div class="sector">自選,機器人</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>2</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">反彈｜多偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>105</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜偏空</strong></div>
+            <div class="field"><span>30分K方向</span><strong>多｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>反彈</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.35x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 105.5，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 104，先不預設已轉空。<br>等｜RR 0.50 未達 1.2；區間參考 104 - 105.5，大量K 102.5 - 105.5。<br>結論｜30分K為 多｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 103.91 作為支撐/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>104</strong></div>
+            <div class="field"><span>壓力</span><strong>105.5</strong><div class='ma60-note'>MA60 103.91 作為支撐/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：104<br>目標：105.5<br>RR：0.50</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>先看 104 是否有效，若快速收回，較像整理或洗盤。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="自選,光通訊">
+          <header class="card-head">
+            <div>
+              <h2>4979 華星光</h2>
+              <div class="sector">自選,光通訊</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>2</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">反彈｜盤整偏多</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>501</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜強空</strong></div>
+            <div class="field"><span>30分K方向</span><strong>盤整｜偏多</strong></div>
+            <div class="field"><span>市場狀態</span><strong>反彈</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.47x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 510，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 475，先不預設已轉空。<br>等｜RR 0.35 未達 1.2；區間參考 475 - 510，大量K 454 - 464。<br>結論｜30分K為 盤整｜偏多；隔日只看封棒確認，不使用未發生5分K。MA60 522.01 作為壓力/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>475</strong></div>
+            <div class="field"><span>壓力</span><strong>510</strong><div class='ma60-note'>MA60 522.01 作為壓力/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：475<br>目標：510<br>RR：0.35</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>風險偏高，若 475 失守，優先等待下一次結構重建。</p></section>
+        </article>
+
+        <article class="stock-card tone-risk" data-cats="自選">
+          <header class="card-head">
+            <div>
+              <h2>8054 安國</h2>
+              <div class="sector">自選</div>
+            </div>
+            <div class="score-box"><span>AI分數</span><strong>2</strong></div>
+          </header>
+          <div class="status-row"><span class="pill">⚠️ 保守盤</span><span class="pill soft">主跌｜盤整偏空</span></div>
+          <section class="card-grid">
+            <div class="field"><span>現價</span><strong>99.7</strong></div>
+            <div class="field"><span>日K方向</span><strong>空｜強空</strong></div>
+            <div class="field"><span>30分K方向</span><strong>盤整｜偏空</strong></div>
+            <div class="field"><span>市場狀態</span><strong>主跌</strong></div>
+            <div class="field"><span>量價判讀</span><strong>量縮｜RV 0.63x｜整理</strong></div>
+          </section>
+          <section class="nextday-box"><div class="script-title">隔日5分K進場判斷</div><p>多｜等待 5 分 K 封棒突破確認；若 RR&lt;1.2 或未站上 101，不追多。<br>空｜等待反彈不過或跌破封棒確認；若仍守 99.7，先不預設已轉空。<br>等｜RR - 未達 1.2；區間參考 99.7 - 101，大量K 100 - 102.5。<br>結論｜30分K為 盤整｜偏空；隔日只看封棒確認，不使用未發生5分K。MA60 101.08 作為壓力/長週期背景，不決定30分K方向</p></section>
+          <section class="card-grid">
+            <div class="field"><span>支撐</span><strong>99.7</strong></div>
+            <div class="field"><span>壓力</span><strong>101</strong><div class='ma60-note'>MA60 101.08 作為壓力/長週期背景，不決定30分K方向</div></div>
+            <div class="field"><span>停損 / 目標 / RR</span><strong>停損：99.7<br>目標：101<br>RR：-</strong></div>
+          </section>
+          <section class="script-box"><div class="script-title">AI策略劇本</div><p>風險偏高，若 99.7 失守，優先等待下一次結構重建。</p></section>
+        </article>
+</div>
   </div>
+  <div class="sub" style="margin-top:12px;">自動產生時間：2026-06-17 23:11</div>
 </div>
 <script>
 const buttons = document.querySelectorAll('.btn');
 const searchBox = document.getElementById('searchBox');
-const rows = document.querySelectorAll('tbody tr[data-cats]');
+const cards = document.querySelectorAll('.stock-card[data-cats]');
 function applyFilter() {
   const activeBtn = document.querySelector('.btn.active');
   const cat = activeBtn ? activeBtn.dataset.cat : '全部';
   const q = (searchBox.value || '').toLowerCase().trim();
-  rows.forEach(row => {
-    const cats = row.dataset.cats || '';
-    const text = row.innerText.toLowerCase();
+  cards.forEach(card => {
+    const cats = card.dataset.cats || '';
+    const text = card.innerText.toLowerCase();
     const catOk = (cat === '全部') || cats.includes(cat);
     const qOk = !q || text.includes(q);
-    row.style.display = (catOk && qOk) ? '' : 'none';
+    card.style.display = (catOk && qOk) ? '' : 'none';
   });
 }
 buttons.forEach(btn => btn.addEventListener('click', () => { buttons.forEach(b => b.classList.remove('active')); btn.classList.add('active'); applyFilter(); }));
